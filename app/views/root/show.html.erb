@@ -1,0 +1,21 @@
+<% if logged_in? %>
+
+  <% if current_user.evernote_credentials? %>
+    <h2>Connected</h2>
+  <% else %>
+    <p>
+      Next step is to connect your Evernote account.
+    </p>
+    <p>
+      <%= link_to "Connect to Evernote", "/auth/evernote", class: 'btn btn-success', data: { disable_with: "Connecting to Evernote..." }  %>
+    </p>
+  <% end %>
+
+<% else %>
+  <p>
+    First step is to connect to your calendar using the Cronofy Calendar API service.
+  </p>
+  <p>
+    <%= link_to "Connect your calendar", "/auth/cronofy", class: 'btn btn-success', data: { disable_with: "Connecting via Cronofy..." }  %>
+  </p>
+<% end %>

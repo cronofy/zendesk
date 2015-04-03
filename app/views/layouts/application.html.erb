@@ -1,14 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Evernote</title>
-  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
-  <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+  <title>Evernote Calendar Connector by Cronofy</title>
+  <%= stylesheet_link_tag    'application', media: 'all' %>
+  <%= javascript_include_tag 'application' %>
   <%= csrf_meta_tags %>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <%= render partial: 'shared/head' %>
 </head>
 <body>
+  <div class="container">
+    <h1>Evernote Calendar Connector</h1>
 
-<%= yield %>
+    <p>
+    Keep your Evernote reminders synchronized with your calendar.
+    </p>
 
+    <%= yield %>
+
+    <%= render partial: 'shared/footer' %>
+  </div>
 </body>
 </html>
