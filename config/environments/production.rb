@@ -46,7 +46,7 @@ Rails.application.configure do
 
   # Use the lowest log level to ensure availability of diagnostic information
   # when problems arise.
-  config.log_level = :debug
+  config.log_level = :info
 
   # Prepend all log lines with the following tags.
   # config.log_tags = [ :subdomain, :uuid ]
@@ -76,4 +76,15 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+
+  config.hatchet.configure do |hatchet|
+    # Reset the logging configuration
+    hatchet.reset!
+    # Use the format without time, etc so we don't duplicate it
+    hatchet.formatter = Hatchet::SimpleFormatter.new
+    # Set up a STDOUT appender
+    hatchet.appenders << Hatchet::LoggerAppender.new do |appender|
+      appender.logger = Logger.new(STDOUT)
+    end
+  end
 end
