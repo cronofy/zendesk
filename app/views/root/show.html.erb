@@ -1,21 +1,45 @@
 <% if logged_in? %>
 
   <% if current_user.evernote_credentials? %>
+
     <h2>Connected</h2>
+
+    <% if @sync_chunk %>
+      <p>
+      chunkHighUSN <%= @sync_chunk.chunkHighUSN %>, update count <%= @sync_chunk.updateCount %>
+      </p>
+
+      <% @sync_chunk.notes.each do |note| %>
+        <p>
+        <%= note.inspect %>
+        </p>
+      <% end if @sync_chunk.notes %>
+
+      <% @sync_chunk.expungedNotes.each do |note| %>
+        <p>
+        <%= note.inspect %>
+        </p>
+      <% end if @sync_chunk.expungedNotes %>
+    <% end %>
+
   <% else %>
+
     <p>
       Next step is to connect your Evernote account.
     </p>
     <p>
       <%= link_to "Connect to Evernote", "/auth/evernote", class: 'btn btn-success', data: { disable_with: "Connecting to Evernote..." }  %>
     </p>
+
   <% end %>
 
 <% else %>
+
   <p>
     First step is to connect to your calendar using the Cronofy Calendar API service.
   </p>
   <p>
     <%= link_to "Connect your calendar", "/auth/cronofy", class: 'btn btn-success', data: { disable_with: "Connecting via Cronofy..." }  %>
   </p>
+
 <% end %>
