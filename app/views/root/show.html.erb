@@ -4,22 +4,16 @@
 
     <h2>Connected</h2>
 
-    <% if @sync_chunk %>
+    <% if @sync_chunk && @notes %>
       <p>
-      chunkHighUSN <%= @sync_chunk.chunkHighUSN %>, update count <%= @sync_chunk.updateCount %>
+      sync chunks <%= @sync_chunks %>, high USN <%= @sync_chunk.chunkHighUSN %>, update count <%= @sync_chunk.updateCount %>
       </p>
 
-      <% @sync_chunk.notes.each do |note| %>
+      <% @notes.each do |note| %>
         <p>
         <%= note.inspect %>
         </p>
-      <% end if @sync_chunk.notes %>
-
-      <% @sync_chunk.expungedNotes.each do |note| %>
-        <p>
-        <%= note.inspect %>
-        </p>
-      <% end if @sync_chunk.expungedNotes %>
+      <% end %>
     <% end %>
 
   <% else %>

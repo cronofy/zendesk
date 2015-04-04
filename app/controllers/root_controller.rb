@@ -8,10 +8,23 @@ class RootController < ApplicationController
       filter.includeNoteAttributes = true
       filter.includeExpunged = true
 
-      after_usn = 0 # Get all the things
+      @notes = []
+      @sync_chunks = 0
+
+      saved_high_usn = 0
+      highest_usn = -1
       max_entries = 100
 
-      @sync_chunk = evernote_note_store.getFilteredSyncChunk(current_user.evernote_access_token, after_usn, max_entries, filter)
+      until saved_high_usn == highest_usn
+        @sync_chunk = evernote_note_store.getFilteredSyncChunk(current_user.evernote_access_token, saved_high_usn, max_entries, filter)
+        @sync_chunks += 1
+
+        @notes.concat(@sync_chunk.notes)         if @sync_chunk.notes
+        @notes.concat(@sync_chunk.expungedNotes) if @sync_chunk.expungedNotes
+
+        saved_high_usn = @sync_chunk.chunkHighUSN
+        highest_usn = @sync_chunk.updateCount
+      end
     end
   rescue => e
     log.error "Failure - #{e.class} - #{e.message}", e
