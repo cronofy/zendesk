@@ -23,4 +23,8 @@ class ApplicationController < ActionController::Base
   def logged_in?
     !current_user.nil?
   end
+
+  def current_time
+    Time.now.getutc
+  end
 end

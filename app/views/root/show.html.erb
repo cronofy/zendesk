@@ -1,18 +1,44 @@
+<% flash.each do |type, message| %>
+  <div class="row">
+    <div class="alert alert-<%= type %> fade in col-md-4" role="alert">
+      <button class="close" data-dismiss="alert">×</button>
+      <%= message %>
+    </div>
+  </div>
+<% end %>
+
 <% if logged_in? %>
 
   <% if current_user.evernote_credentials? %>
 
-    <h2>Connected</h2>
+    <% if current_user.cronofy_calendar_id %>
+      <h2>Connected</h2>
 
-    <% if @sync_chunk && @notes %>
-      <p>
-      sync chunks <%= @sync_chunks %>, high USN <%= @sync_chunk.chunkHighUSN %>, update count <%= @sync_chunk.updateCount %>
-      </p>
+      <%= button_to "Sync", sync_path %>
+      <%= button_to "Reset", reset_path %>
 
-      <% @notes.each do |note| %>
+      <% if notes.any? %>
         <p>
-        <%= note.inspect %>
+        sync chunks <%= sync_chunks %>, high USN <%= sync_chunk.chunkHighUSN %>, update count <%= sync_chunk.updateCount %>
         </p>
+
+        <% notes_as_events.each do |event| %>
+          <p>
+          <pre><%= JSON.pretty_generate(event) %></pre>
+          </p>
+        <% end %>
+      <% end %>
+
+    <% else %>
+
+      <h2>Select calendar</h2>
+      <%= form_tag calendar_path do %>
+        <div class="form-group">
+          <label for="calendar_id">Select calendar</label>
+          <%= select_tag "calendar_id", grouped_options_for_select(grouped_calendars, current_user.cronofy_calendar_id) %>
+        </div>
+
+        <%= submit_tag 'Set target calendar', class: 'btn btn-success', data: { disable_with: "Setting calendar..." } %>
       <% end %>
     <% end %>
 
