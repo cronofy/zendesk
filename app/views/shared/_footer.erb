@@ -2,7 +2,8 @@
   <% if logged_in? %>
     <p>
       <div class="btn-group" role="group">
-        <%= link_to 'Logout', '/logout', class: 'btn btn-link' %> <%= button_to 'Delete Account', '/', method: :delete, data: { confirm: "Are you sure?", disable_with: "Deleting..." }, class: 'btn btn-link' %>
+        <%= button_to 'Logout', session_path, method: :delete, class: 'btn btn-link' %>
+        <%= button_to 'Delete Account', '/', method: :delete, data: { confirm: "Are you sure?", disable_with: "Deleting..." }, class: 'btn btn-link' %>
       </div>
     </p>
   <% end %>

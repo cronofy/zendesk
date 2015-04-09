@@ -42,7 +42,40 @@ class RootController < ApplicationController
     current_user.evernote_high_usn = self.evernote_high_usn
     current_user.save
 
-    flash[:info] = "Synced #{notes.count} notes"
+    sync_start = current_time
+
+    events_as_notes.each do |note|
+      en_note = evernote_note_store.getNote(current_user.evernote_access_token, note[:guid], false, false, false, false)
+      note_changed = false
+
+      if en_note.title != note[:title]
+        en_note.title = note[:title]
+        note_changed = true
+      end
+
+      if note[:has_reminder]
+        if en_note.attributes.reminderTime != note[:reminder_time].to_i * 1000
+          en_note.attributes.reminderTime = note[:reminder_time].to_i * 1000
+          note_changed = true
+        end
+      else
+        if en_note.attributes.reminderTime
+          en_note.attributes.reminderTime = nil
+          en_note.attributes.reminderOrder = nil
+          en_note.attributes.reminderDoneTime = nil
+          note_changed = true
+        end
+      end
+
+      if note_changed
+        evernote_note_store.updateNote(current_user.evernote_access_token, en_note)
+      end
+    end
+
+    current_user.cronofy_last_modified = sync_start
+    current_user.save
+
+    flash[:info] = "Note reminders synced"
 
     redirect_to :root
   end
@@ -94,6 +127,7 @@ class RootController < ApplicationController
       hash = {
         event_id: note.guid,
         event_deleted: event_deleted,
+        note_attributes: note.attributes.inspect,
         attributes: {
           event_id: note.guid,
           summary: note.title,
@@ -112,10 +146,37 @@ class RootController < ApplicationController
     end
   end
 
+  def altered_events
+    return @altered_events if @altered_events
+
+    args = {
+      tzid: "Etc/UTC",
+      only_managed: true,
+      include_deleted: true,
+    }
+
+    if current_user.cronofy_last_modified
+      args[:last_modified] = current_user.cronofy_last_modified
+    end
+
+    @altered_events = cronofy_client.read_events(args)["events"]
+  end
+
+  def events_as_notes
+    altered_events.map do |event|
+      {
+        guid: event["event_id"],
+        title: event["summary"],
+        has_reminder: !event["deleted"],
+        reminder_time: Time.parse(event["start"]),
+      }
+    end
+  end
+
   attr_reader :sync_chunk
   attr_reader :sync_chunks
 
-  helper_method :notes, :sync_chunk, :sync_chunks, :notes_as_events
+  helper_method :notes, :sync_chunk, :sync_chunks, :notes_as_events, :altered_events, :events_as_notes
 
   def calendars
     @calendars ||= cronofy_client.list_calendars["calendars"]

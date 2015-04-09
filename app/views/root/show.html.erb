@@ -18,6 +18,8 @@
       <%= button_to "Reset", reset_path %>
 
       <% if notes.any? %>
+        <h3>Notes</h3>
+
         <p>
         sync chunks <%= sync_chunks %>, high USN <%= sync_chunk.chunkHighUSN %>, update count <%= sync_chunk.updateCount %>
         </p>
@@ -25,6 +27,16 @@
         <% notes_as_events.each do |event| %>
           <p>
           <pre><%= JSON.pretty_generate(event) %></pre>
+          </p>
+        <% end %>
+      <% end %>
+
+      <% if altered_events.any? %>
+        <h3>Events</h3>
+
+        <% events_as_notes.each do |note| %>
+          <p>
+          <pre><%= JSON.pretty_generate(note) %></pre>
           </p>
         <% end %>
       <% end %>
