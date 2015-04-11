@@ -10,7 +10,7 @@ gem 'uglifier', '>= 1.3.0'
 
 gem 'unicorn'
 
-gem 'cronofy', path: "../cronofy-ruby"
+gem 'cronofy'
 gem 'evernote_oauth'
 
 gem 'omniauth-cronofy'

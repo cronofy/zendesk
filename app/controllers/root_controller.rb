@@ -118,7 +118,7 @@ class RootController < ApplicationController
     @evernote_high_usn = value
   end
 
-  REMINDER_DURATION_SECONDS = 10 * 60
+  REMINDER_DURATION_SECONDS = 30 * 60
 
   def notes_as_events
     notes.map do |note|
@@ -159,16 +159,16 @@ class RootController < ApplicationController
       args[:last_modified] = current_user.cronofy_last_modified
     end
 
-    @altered_events = cronofy_client.read_events(args)["events"]
+    @altered_events = api_request { cronofy_client.read_events(args).to_a }
   end
 
   def events_as_notes
     altered_events.map do |event|
       {
-        guid: event["event_id"],
-        title: event["summary"],
-        has_reminder: !event["deleted"],
-        reminder_time: Time.parse(event["start"]),
+        guid: event.event_id,
+        title: event.summary,
+        has_reminder: !event.deleted,
+        reminder_time: event.start.to_time,
       }
     end
   end
@@ -179,13 +179,13 @@ class RootController < ApplicationController
   helper_method :notes, :sync_chunk, :sync_chunks, :notes_as_events, :altered_events, :events_as_notes
 
   def calendars
-    @calendars ||= cronofy_client.list_calendars["calendars"]
+    @calendars ||= api_request { cronofy_client.list_calendars }
   end
 
   helper_method :calendars
 
   def writable_calendars
-    calendars.reject { |c| c["calendar_readonly"] }
+    calendars.reject(&:calendar_readonly)
   end
 
   helper_method :writable_calendars
@@ -193,7 +193,7 @@ class RootController < ApplicationController
   def grouped_calendars
     @grouped_calendars ||= begin
       writable_calendars
-        .map { |c| [ c["calendar_name"], "#{c["profile_name"]} [#{c["provider_name"].titlecase}]", c["calendar_id"] ] }
+        .map { |c| [ c.calendar_name, "#{c.profile_name} [#{c.provider_name.titlecase}]", c.calendar_id ] }
         .sort_by { |c| [c[1], c[0].downcase] }
         .group_by { |c| c[1] }
     end
@@ -211,10 +211,8 @@ class RootController < ApplicationController
 
   def cronofy_client
     @cronofy_client ||= Cronofy::Client.new(
-      ENV["CRONOFY_CLIENT_ID"],
-      ENV["CRONOFY_CLIENT_SECRET"],
-      current_user.cronofy_access_token,
-      current_user.cronofy_refresh_token
+      access_token: current_user.cronofy_access_token,
+      refresh_token: current_user.cronofy_refresh_token,
     )
   end
 
