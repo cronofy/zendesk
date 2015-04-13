@@ -12,34 +12,11 @@
   <% if current_user.evernote_credentials? %>
 
     <% if current_user.cronofy_calendar_id %>
+
       <h2>Connected</h2>
 
       <%= button_to "Sync", sync_path %>
       <%= button_to "Reset", reset_path %>
-
-      <% if notes.any? %>
-        <h3>Notes</h3>
-
-        <p>
-        sync chunks <%= sync_chunks %>, high USN <%= sync_chunk.chunkHighUSN %>, update count <%= sync_chunk.updateCount %>
-        </p>
-
-        <% notes_as_events.each do |event| %>
-          <p>
-          <pre><%= JSON.pretty_generate(event) %></pre>
-          </p>
-        <% end %>
-      <% end %>
-
-      <% if altered_events.any? %>
-        <h3>Events</h3>
-
-        <% events_as_notes.each do |note| %>
-          <p>
-          <pre><%= JSON.pretty_generate(note) %></pre>
-          </p>
-        <% end %>
-      <% end %>
 
     <% else %>
 
@@ -52,6 +29,7 @@
 
         <%= submit_tag 'Set target calendar', class: 'btn btn-success', data: { disable_with: "Setting calendar..." } %>
       <% end %>
+
     <% end %>
 
   <% else %>

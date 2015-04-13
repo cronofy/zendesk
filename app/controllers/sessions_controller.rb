@@ -1,6 +1,6 @@
 class SessionsController < ApplicationController
   def create
-    logger.debug { "#create #{auth_hash.inspect}" }
+    log.debug { "#create #{auth_hash.inspect}" }
 
     case auth_hash['provider']
     when 'cronofy'
@@ -30,7 +30,7 @@ class SessionsController < ApplicationController
 
   def destroy
     logout
-    flash[:notice] = "Logged out"
+    flash[:info] = "Logged out"
     redirect_to :root
   end
 
