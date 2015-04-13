@@ -7,11 +7,12 @@ class RootController < ApplicationController
       current_user.set_cronofy_calendar_id(params[:calendar_id])
       current_user.save(current_user)
       flash[:info] = "Calendar ID set"
+      # pre-emptively perform a sync
+      sync
     else
       flash[:alert] = "Must be connected to your calendar account before we do that"
+      redirect_to :root
     end
-
-    redirect_to :root
   end
 
   def sync
