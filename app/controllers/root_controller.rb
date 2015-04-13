@@ -20,7 +20,7 @@ class RootController < ApplicationController
     SyncRemindersFromCronofy.new.perform(current_user.id)
 
     if ENV["CALLBACKS_ENABLED"].to_i > 0
-      callback_url = cronofy_callback_url(id: current_user.id)
+      callback_url = cronofy_callback_url(id: current_user.cronofy_id)
       reminder_synchronizer.create_cronofy_notification_channel(callback_url)
     end
 
