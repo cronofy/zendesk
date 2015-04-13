@@ -6,6 +6,9 @@ Rails.application.routes.draw do
   post 'sync', to: 'root#sync'
   delete '/', to: 'root#destroy'
 
+  post '/webhooks/cronofy/:id', to: 'cronofy_webhooks#inbound', as: 'cronofy_callback'
+  get '/webhooks/evernote/:id', to: 'evernote_webhooks#inbound', as: 'evernote_callback'
+
   get "/auth/:provider/callback", to: "sessions#create"
   get "/auth/failure", to: "sessions#failure"
 

@@ -26,6 +26,12 @@ class ReminderSynchronizer
     user.save
   end
 
+  def create_cronofy_notification_channel(callback_url)
+    api_request do
+      cronofy_client.create_channel(callback_url)
+    end
+  end
+
   def sync_changed_events
     sync_start = current_time
 

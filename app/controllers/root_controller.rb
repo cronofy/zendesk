@@ -19,6 +19,11 @@ class RootController < ApplicationController
     SyncRemindersFromEvernote.new.perform(current_user.id)
     SyncRemindersFromCronofy.new.perform(current_user.id)
 
+    if ENV["CALLBACKS_ENABLED"].to_i > 0
+      callback_url = cronofy_callback_url(id: current_user.id)
+      reminder_synchronizer.create_cronofy_notification_channel(callback_url)
+    end
+
     flash[:info] = "Note reminders synced"
 
     redirect_to :root
