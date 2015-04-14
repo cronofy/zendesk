@@ -84,6 +84,8 @@ Rails.application.configure do
     hatchet.formatter = Hatchet::SimpleFormatter.new
     # Set up a STDOUT appender
     hatchet.appenders << Hatchet::LoggerAppender.new do |appender|
+      # Ensure synchronous STDOUT for Heroku
+      STDOUT.sync = true
       appender.logger = Logger.new(STDOUT)
     end
   end

@@ -10,7 +10,8 @@ gem 'uglifier', '>= 1.3.0'
 
 gem 'delayed_job_active_record'
 
-gem 'unicorn'
+gem 'puma'
+gem 'rack-timeout'
 
 gem 'cronofy'
 gem 'evernote_oauth'
