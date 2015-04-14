@@ -9,14 +9,22 @@
 
 <% if logged_in? %>
 
+  <p class="success">
+    <span class="glyphicon glyphicon-ok"></span> Connected to calendars for <strong><%= current_user.email %></strong>
+  </p>
+
   <% if current_user.evernote_credentials? %>
 
     <% if current_user.cronofy_calendar_id %>
 
-      <h2>Connected</h2>
+      <p class="success">
+        <span class="glyphicon glyphicon-ok"></span> Connected to <strong>Evernote</strong>
+      </p>
 
-      <%= button_to "Sync", sync_path %>
-      <%= button_to "Reset", reset_path %>
+      <div class="btn-group" role="group">
+        <%= button_to "Start calendar sync", sync_path, class: 'btn btn-success' %>
+        <%= button_to "Reset sync data", reset_path, class: 'btn btn-link'%>
+      </div>
 
     <% else %>
 
