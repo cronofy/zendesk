@@ -16,8 +16,8 @@ class RootController < ApplicationController
   end
 
   def sync
-    SyncRemindersFromEvernote.new.perform(current_user.id)
-    SyncRemindersFromCronofy.new.perform(current_user.id)
+    SyncRemindersFromEvernote.perform_later(current_user.id)
+    SyncRemindersFromCronofy.perform_later(current_user.id)
 
     if ENV["CALLBACKS_ENABLED"].to_i > 0
       callback_url = cronofy_callback_url(id: current_user.cronofy_id)

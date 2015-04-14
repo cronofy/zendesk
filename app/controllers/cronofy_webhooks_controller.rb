@@ -8,7 +8,7 @@ class CronofyWebhooksController < ApplicationController
       user = User.find_by(cronofy_id: params[:id])
 
       if user
-        SyncRemindersFromCronofy.new.perform(user.id)
+        SyncRemindersFromCronofy.perform_later(user.id)
         render nothing: true, status: :ok
       else
         render nothing: true, status: :not_found
