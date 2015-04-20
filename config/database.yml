@@ -18,4 +18,3 @@ test:
 
 production:
   <<: *default
-  url: <%= ENV["POSTGRESQL_URL_EXT"] %>
