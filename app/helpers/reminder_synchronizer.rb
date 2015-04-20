@@ -3,6 +3,24 @@ class ReminderSynchronizer
 
   REMINDER_DURATION_SECONDS = 30 * 60
 
+  class CronofyCredentialsInvalid < StandardError
+    attr_reader :user_id
+
+    def initialize(user_id)
+      super("Cronofy credentials invalid for user=#{user_id}")
+      @user_id = user_id
+    end
+  end
+
+  class EvernoteCredentialsInvalid < StandardError
+    attr_reader :user_id
+
+    def initialize(user_id)
+      super("Evernote credentials invalid for user=#{user_id}")
+      @user_id = user_id
+    end
+  end
+
   attr_reader :user
 
   def initialize(user)
@@ -10,24 +28,28 @@ class ReminderSynchronizer
   end
 
   def writable_calendars
-    api_request do
+    cronofy_request do
       cronofy_client.list_calendars.reject(&:calendar_readonly)
     end
   end
 
   def sync_changed_notes
-    notes, highest_usn = self.changed_notes
+    notes, highest_usn = evernote_request { changed_notes }
 
     notes.each do |note|
-      update_event(note)
+      cronofy_request do
+        update_event(note)
+      end
     end
 
     user.evernote_high_usn = highest_usn
     user.save
+  rescue => e
+    log.error "Failed to sync changed notes - user=#{user.id} - #{e.class} - #{e.message}", e
   end
 
   def create_cronofy_notification_channel(callback_url)
-    api_request do
+    cronofy_request do
       cronofy_client.create_channel(callback_url)
     end
   end
@@ -35,15 +57,17 @@ class ReminderSynchronizer
   def sync_changed_events
     sync_start = current_time
 
-    events = self.changed_events
+    events = changed_events
 
     events.each do |event|
-      update_evernote_reminder_from_event(event)
+      evernote_request { update_evernote_reminder_from_event(event) }
     end
 
     user.cronofy_last_modified = sync_start
     user.save
   end
+
+  private
 
   def changed_events
     args = {
@@ -56,7 +80,7 @@ class ReminderSynchronizer
       args[:last_modified] = user.cronofy_last_modified
     end
 
-    api_request { cronofy_client.read_events(args).to_a }
+    cronofy_request { cronofy_client.read_events(args).to_a }
   end
 
   def changed_notes
@@ -86,8 +110,6 @@ class ReminderSynchronizer
     [notes, highest_usn]
   end
 
-  private
-
   def update_evernote_reminder_from_event(event)
     cr_note = event_as_note(event)
 
@@ -100,8 +122,10 @@ class ReminderSynchronizer
     end
 
     if cr_note[:has_reminder]
-      if en_note.attributes.reminderTime != cr_note[:reminder_time].to_i * 1000
-        en_note.attributes.reminderTime = cr_note[:reminder_time].to_i * 1000
+      reminder_time = cr_note[:reminder_time].to_i * 1000
+
+      if en_note.attributes.reminderTime != reminder_time
+        en_note.attributes.reminderTime = reminder_time
         en_note_changed = true
       end
     else
@@ -122,25 +146,11 @@ class ReminderSynchronizer
     event = note_as_event(note)
 
     if event[:event_deleted]
-      delete_event(event[:event_id])
+      log.info { "Deleting #{event[:event_id]}" }
+      cronofy_client.delete_event(user.cronofy_calendar_id, event[:event_id])
     else
-      upsert_event(event[:attributes])
-    end
-  end
-
-  def delete_event(event_id)
-    log.info { "Deleting #{event_id}" }
-
-    api_request do
-      cronofy_client.delete_event(user.cronofy_calendar_id, event_id)
-    end
-  end
-
-  def upsert_event(event)
-    log.info { "Upserting #{event[:event_id]}" }
-
-    api_request do
-      cronofy_client.upsert_event(user.cronofy_calendar_id, event)
+      log.info { "Upserting #{event[:event_id]}" }
+      cronofy_client.upsert_event(user.cronofy_calendar_id, event[:attributes])
     end
   end
 
@@ -149,12 +159,14 @@ class ReminderSynchronizer
       guid: event.event_id,
       title: event.summary,
       has_reminder: !event.deleted,
-      reminder_time: event.start.to_time,
+      reminder_time: event.start.to_time.getutc,
     }
   end
 
   def note_as_event(note)
     event_deleted = (!!note.deleted or note.attributes.reminderTime.nil?)
+
+    note_url = evernote_client.endpoint("shard/#{evernote_user.shardId}/nl/#{evernote_user.id}/#{note.guid}/")
 
     hash = {
       event_id: note.guid,
@@ -163,18 +175,74 @@ class ReminderSynchronizer
       attributes: {
         event_id: note.guid,
         summary: note.title,
-        description: "Note #{note.guid}",
+        description: note_url,
       },
     }
 
     if reminder_time = note.attributes.reminderTime
+      log.debug { "reminder_time=#{reminder_time} (#{reminder_time.class})" }
       start_time = Time.at(reminder_time / 1000.0)
+      log.debug { "start_time=#{start_time} (#{start_time.class})" }
 
       hash[:attributes][:start] = start_time
       hash[:attributes][:end] = start_time + REMINDER_DURATION_SECONDS
     end
 
     hash
+  end
+
+  # Wrapper for Cronofy API requests to handle refreshing the access token
+  def cronofy_request(&block)
+    if user.cronofy_access_token_expired?(current_time)
+      log.info { "#cronofy_request pre-emptively refreshing expired token" }
+      refresh_cronofy_access_token
+    end
+
+    begin
+      block.call
+    rescue Cronofy::AuthenticationFailureError
+      log.info { "#cronofy_request attempting to refresh token - user=#{user.id}" }
+      refresh_cronofy_access_token
+      block.call
+    end
+  rescue Cronofy::AuthenticationFailureError => e
+    log.warn "#cronofy_request failed - user=#{user.id} - #{e.class} - #{e.message}", e
+    raise CronofyCredentialsInvalid.new(user.id)
+  rescue => e
+    log.error "#cronofy_request failed - user=#{user.id} - #{e.class} - #{e.message}", e
+    raise
+  end
+
+  # Wrapper for Evernote API requests to handle refreshing the access token
+  def evernote_request(&block)
+    block.call
+  rescue Evernote::EDAM::Error::EDAMUserException => e
+    error_desc = Evernote::EDAM::Error::EDAMErrorCode::VALUE_MAP.fetch(e.errorCode, "Unknown")
+
+    if e.errorCode == Evernote::EDAM::Error::EDAMErrorCode::AUTH_EXPIRED
+      log.warn "#evernote_request failed - user=#{user.id} - #{e.class} - errorCode=#{e.errorCode}, errorDesc=#{error_desc}", e
+      raise EvernoteCredentialsInvalid.new(user.id)
+    end
+
+    log.error "#evernote_request failed - user=#{user.id} - #{e.class} - errorCode=#{e.errorCode}, errorDesc=#{error_desc}", e
+    raise
+  rescue => e
+    log.error "#evernote_request failed - user=#{user.id} - #{e.class} - #{e.message}", e
+    raise
+  end
+
+  def refresh_cronofy_access_token
+    credentials = cronofy_client.refresh_access_token
+
+    user.cronofy_access_token = credentials.access_token
+    user.cronofy_refresh_token = credentials.refresh_token
+    user.cronofy_access_token_expiration = Time.at(credentials.expires_at).getutc
+
+    user.save
+  end
+
+  def current_time
+    Time.now.getutc
   end
 
   def evernote_client
@@ -185,43 +253,18 @@ class ReminderSynchronizer
     @evernote_note_store ||= evernote_client.note_store
   end
 
+  def evernote_user_store
+    @evernote_user_store ||= evernote_client.user_store
+  end
+
+  def evernote_user
+    @evernote_user ||= evernote_user_store.getUser(user.evernote_access_token)
+  end
+
   def cronofy_client
     @cronofy_client ||= Cronofy::Client.new(
       access_token: user.cronofy_access_token,
       refresh_token: user.cronofy_refresh_token,
     )
-  end
-
-  # Wrapper for API requests to handle refreshing the access token when it's expired
-  def api_request(&block)
-    begin
-      if user.cronofy_access_token_expired?(current_time)
-        log.info { "#api_request pre-emptively refreshing expired token" }
-        refresh_user_access_token
-      end
-
-      block.call
-    rescue Cronofy::AuthenticationFailureError
-      log.info { "#api_request attempting to refresh token" }
-      refresh_user_access_token
-      block.call
-    rescue => e
-      log.error "#api_request failed with #{e.message}", e
-      raise
-    end
-  end
-
-  def refresh_user_access_token
-    credentials = cronofy_client.refresh_access_token
-    log.debug { credentials.to_hash }
-
-    user.cronofy_access_token = credentials.access_token
-    user.cronofy_refresh_token = credentials.refresh_token
-    user.cronofy_access_token_expiration = Time.at(credentials.expires_at).getutc
-    user.save
-  end
-
-  def current_time
-    Time.now.getutc
   end
 end

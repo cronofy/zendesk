@@ -13,5 +13,6 @@ class SyncRemindersFromCronofy < ActiveJob::Base
     log.info { "Exiting #perform(user_id=#{user_id})" }
   rescue => e
     log.error "Error within #perform(user_id=#{user_id}) - #{e.message}", e
+    raise
   end
 end

@@ -46,7 +46,7 @@ GEM
       autoprefixer-rails (>= 5.0.0.1)
       sass (>= 3.2.19)
     builder (3.2.2)
-    cronofy (0.1.0)
+    cronofy (0.1.1)
       hashie (~> 3.0)
       oauth2 (~> 1.0)
     debug_inspector (0.0.2)
