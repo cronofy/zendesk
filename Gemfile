@@ -10,7 +10,7 @@ gem 'uglifier', '>= 1.3.0'
 
 gem 'delayed_job_active_record'
 
-gem 'puma'
+gem 'unicorn'
 gem 'rack-timeout'
 
 gem 'cronofy'
