@@ -78,15 +78,14 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   config.hatchet.configure do |hatchet|
-    # Reset the logging configuration
-    hatchet.reset!
-    # Use the format without time, etc so we don't duplicate it
-    hatchet.formatter = Hatchet::SimpleFormatter.new
-    # Set up a STDOUT appender
-    hatchet.appenders << Hatchet::LoggerAppender.new do |appender|
-      # Ensure synchronous STDOUT for Heroku
-      STDOUT.sync = true
-      appender.logger = Logger.new(STDOUT)
-    end
+    require 'rbconfig'
+
+    hatchet.backtrace_filters Bundler.bundle_path.to_s       => '[BUNDLER]',
+                              Bundler.bin_path.to_s          => '[BUNDLER]',
+                              Rails.root.to_s                => '[RAILS_ROOT]',
+                              RbConfig::CONFIG['sitelibdir'] => '[SITELIBDIR]',
+                              RbConfig::CONFIG['rubylibdir'] => '[RUBYLIBDIR]',
+                              RbConfig::CONFIG['libdir']     => '[LIBDIR]',
+                              RbConfig::CONFIG['sitedir']    => '[SITEDIR]'
   end
 end
