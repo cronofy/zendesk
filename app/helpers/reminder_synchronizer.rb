@@ -164,26 +164,29 @@ class ReminderSynchronizer
   def note_as_event(note)
     event_deleted = (!!note.deleted or note.attributes.reminderTime.nil?)
 
-    note_url = evernote_client.endpoint("shard/#{evernote_user.shardId}/nl/#{evernote_user.id}/#{note.guid}/")
-
     hash = {
       event_id: note.guid,
       event_deleted: event_deleted,
       note_attributes: note.attributes.inspect,
-      attributes: {
-        event_id: note.guid,
-        summary: note.title,
-        description: note_url,
-      },
     }
 
-    if reminder_time = note.attributes.reminderTime
-      log.debug { "reminder_time=#{reminder_time} (#{reminder_time.class})" }
-      start_time = Time.at(reminder_time / 1000.0)
-      log.debug { "start_time=#{start_time} (#{start_time.class})" }
+    unless event_deleted
+      note_url = evernote_client.endpoint("shard/#{evernote_user.shardId}/nl/#{evernote_user.id}/#{note.guid}/?utm_source=cronofy&utm_medium=calendar&utm_campaign=calendar_connector")
 
-      hash[:attributes][:start] = start_time
-      hash[:attributes][:end] = start_time + REMINDER_DURATION_SECONDS
+      hash[:attributes] = {
+        event_id: note.guid,
+        summary: note.title,
+        description: shorten_url(note_url),
+      }
+
+      if reminder_time = note.attributes.reminderTime
+        log.debug { "reminder_time=#{reminder_time} (#{reminder_time.class})" }
+        start_time = Time.at(reminder_time / 1000.0)
+        log.debug { "start_time=#{start_time} (#{start_time.class})" }
+
+        hash[:attributes][:start] = start_time
+        hash[:attributes][:end] = start_time + REMINDER_DURATION_SECONDS
+      end
     end
 
     hash
@@ -267,5 +270,16 @@ class ReminderSynchronizer
       access_token: user.cronofy_access_token,
       refresh_token: user.cronofy_refresh_token,
     )
+  end
+
+  def shorten_url(url)
+    if Shortinator.configured?
+      Shortinator.shorten(url, 'evernote')
+    else
+      url
+    end
+  rescue => e
+    log.error "Failed to shorten url=#{url} - #{e.class} - #{e.message}", e
+    url
   end
 end

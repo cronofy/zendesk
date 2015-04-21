@@ -26,3 +26,5 @@ group :development, :test do
   gem 'web-console', '~> 2.0'
 end
 
+# Cronofy specific
+gem 'shortinator', git: "https://github.com/adambird/shortinator.git"
