@@ -28,3 +28,4 @@ end
 
 # Cronofy specific
 gem 'shortinator', git: "https://github.com/cronofy/shortinator.git"
+gem 'postmark-rails'

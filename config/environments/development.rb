@@ -13,8 +13,10 @@ Rails.application.configure do
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = false
 
-  # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.default_url_options = { host: ENV['WEB_HOST'] || "evernote.dev", :protocol => 'http' }
+  config.action_mailer.delivery_method = :postmark
+  config.action_mailer.postmark_settings = { api_key: ENV['POSTMARK_API_KEY'], secure: true }
+  config.action_mailer.raise_delivery_errors = true
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log

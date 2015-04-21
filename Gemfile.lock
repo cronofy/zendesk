@@ -129,6 +129,12 @@ GEM
       oauth2 (~> 1.0)
       omniauth (~> 1.2)
     pg (0.18.1)
+    postmark (1.5.0)
+      json
+      rake
+    postmark-rails (0.10.0)
+      actionmailer (>= 3.0.0)
+      postmark (~> 1.5.0)
     rack (1.6.0)
     rack-test (0.6.3)
       rack (>= 1.0)
@@ -220,6 +226,7 @@ DEPENDENCIES
   omniauth-cronofy
   omniauth-evernote
   pg
+  postmark-rails
   rails (= 4.2.1)
   rspec-rails
   sass-rails (~> 5.0)
