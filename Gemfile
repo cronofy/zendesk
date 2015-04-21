@@ -27,4 +27,4 @@ group :development, :test do
 end
 
 # Cronofy specific
-gem 'shortinator', git: "https://github.com/adambird/shortinator.git"
+gem 'shortinator', git: "https://github.com/cronofy/shortinator.git"

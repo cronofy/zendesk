@@ -1,5 +1,5 @@
 GIT
-  remote: https://github.com/adambird/shortinator.git
+  remote: https://github.com/cronofy/shortinator.git
   revision: 268e92d941993bfae0099a9eb4d47cd90e272f0f
   specs:
     shortinator (0.0.1)
