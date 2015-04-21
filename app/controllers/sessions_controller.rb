@@ -42,10 +42,13 @@ class SessionsController < ApplicationController
 
   def process_cronofy_login(auth_hash)
     user = User.find_or_create_by(cronofy_id: auth_hash['uid'])
+
     user.email = auth_hash['info']['email']
     user.cronofy_access_token = auth_hash['credentials']['token']
     user.cronofy_refresh_token = auth_hash['credentials']['refresh_token']
+    user.cronofy_access_token_expiration = Time.at(auth_hash['credentials']['expires_at']).getutc
     user.save
+
     login(user)
   end
 
