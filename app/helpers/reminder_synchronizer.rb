@@ -44,8 +44,6 @@ class ReminderSynchronizer
 
     user.evernote_high_usn = highest_usn
     user.save
-  rescue => e
-    log.error "Failed to sync changed notes - user=#{user.id} - #{e.class} - #{e.message}", e
   end
 
   def create_cronofy_notification_channel(callback_url)
@@ -239,6 +237,9 @@ class ReminderSynchronizer
     user.cronofy_access_token_expiration = Time.at(credentials.expires_at).getutc
 
     user.save
+  rescue Cronofy::BadRequestError => e
+    log.warn "#refresh_cronofy_access_token failed - user=#{user.id} - #{e.class} - #{e.message}", e
+    raise CronofyCredentialsInvalid.new(user.id)
   end
 
   def current_time

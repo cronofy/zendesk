@@ -9,49 +9,71 @@
 
 <% if logged_in? %>
 
-  <p class="success">
-    <span class="glyphicon glyphicon-ok"></span> Connected to calendars for <strong><%= current_user.email %></strong>
-  </p>
+  <% if current_user.cronofy_credentials? %>
 
-  <% if current_user.evernote_credentials? %>
+    <p class="success">
+      <span class="glyphicon glyphicon-ok"></span> Connected to calendars for <strong><%= current_user.email %></strong>
+    </p>
 
-    <% if current_user.cronofy_calendar_id %>
+    <% if current_user.evernote_credentials? %>
 
       <p class="success">
         <span class="glyphicon glyphicon-ok"></span> Connected to <strong>Evernote</strong>
       </p>
 
-      <div class="btn-group" role="group">
-        <%= button_to "Start calendar sync", sync_path, class: 'btn btn-success' %>
-        <%= button_to "Reset sync data", reset_path, class: 'btn btn-link'%>
-      </div>
+      <% if current_user.cronofy_calendar_id %>
 
-    <% else %>
-
-      <h2>Select calendar</h2>
-      <%= form_tag calendar_path do %>
-        <div class="form-group">
-          <label for="calendar_id">Select calendar</label>
-          <%= select_tag "calendar_id", grouped_options_for_select(grouped_calendars, current_user.cronofy_calendar_id) %>
+        <div class="btn-group" role="group">
+          <%= button_to "Start calendar sync", sync_path, class: 'btn btn-success' %>
+          <%= button_to "Reset sync data", reset_path, class: 'btn btn-link'%>
         </div>
 
-        <%= submit_tag 'Set target calendar', class: 'btn btn-success', data: { disable_with: "Setting calendar..." } %>
+      <% else %>
+
+        <h2>Select calendar</h2>
+        <%= form_tag calendar_path do %>
+          <div class="form-group">
+            <label for="calendar_id">Select calendar</label>
+            <%= select_tag "calendar_id", grouped_options_for_select(grouped_calendars, current_user.cronofy_calendar_id) %>
+          </div>
+
+          <%= submit_tag 'Set target calendar', class: 'btn btn-success', data: { disable_with: "Setting calendar..." } %>
+        <% end %>
+
+      <% end %>
+
+    <% else # no evernote credentials %>
+
+      <% if current_user.evernote_user_id %>
+        <p>
+          Please reconnect your Evernote account.
+        </p>
+        <p>
+          <%= link_to "Reconnect to Evernote", "/auth/evernote", class: 'btn btn-success', data: { disable_with: "Connecting to Evernote..." }  %>
+        </p>
+      <% else %>
+        <p>
+          Next step is to connect your Evernote account.
+        </p>
+        <p>
+          <%= link_to "Connect to Evernote", "/auth/evernote", class: 'btn btn-success', data: { disable_with: "Connecting to Evernote..." }  %>
+        </p>
       <% end %>
 
     <% end %>
 
-  <% else %>
+  <% else # no cronofy credentials %>
 
     <p>
-      Next step is to connect your Evernote account.
+      Please reconnect to your calendar using the Cronofy Calendar API service.
     </p>
     <p>
-      <%= link_to "Connect to Evernote", "/auth/evernote", class: 'btn btn-success', data: { disable_with: "Connecting to Evernote..." }  %>
+      <%= link_to "Reconnect your calendar", "/auth/cronofy", class: 'btn btn-success', data: { disable_with: "Connecting via Cronofy..." }  %>
     </p>
 
   <% end %>
 
-<% else %>
+<% else # not logged in %>
 
   <p>
     First step is to connect to your calendar using the Cronofy Calendar API service.
