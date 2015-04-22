@@ -7,8 +7,8 @@ class RootController < ApplicationController
       current_user.set_cronofy_calendar_id(params[:calendar_id])
       current_user.save(current_user)
       flash[:info] = "Calendar ID set"
-      # pre-emptively perform a sync
-      sync
+
+      reminder_synchronizer.setup_sync
     else
       flash[:alert] = "Must be connected to your calendar account before we do that"
       redirect_to :root
@@ -16,15 +16,11 @@ class RootController < ApplicationController
   end
 
   def sync
-    SyncRemindersFromEvernote.perform_later(current_user.id)
-    SyncRemindersFromCronofy.perform_later(current_user.id)
+    if current_user.active?
+      reminder_synchronizer.setup_sync
 
-    if ENV["CALLBACKS_ENABLED"].to_i > 0
-      callback_url = cronofy_callback_url(id: current_user.cronofy_id)
-      reminder_synchronizer.create_cronofy_notification_channel(callback_url)
+      flash[:info] = "Note reminders synced"
     end
-
-    flash[:info] = "Note reminders synced"
 
     redirect_to :root
   end

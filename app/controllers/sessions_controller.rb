@@ -50,6 +50,7 @@ class SessionsController < ApplicationController
     user.save
 
     login(user)
+    setup_sync(user)
   end
 
   def process_evernote_login(auth_hash)
@@ -57,5 +58,13 @@ class SessionsController < ApplicationController
     current_user.evernote_user_id = auth_hash['uid']
     current_user.evernote_access_token = auth_hash['credentials']['token']
     current_user.save
+
+    setup_sync(current_user)
+  end
+
+  def setup_sync(user)
+    return unless user.active?
+
+    ReminderSynchronizer.new(user).setup_sync
   end
 end

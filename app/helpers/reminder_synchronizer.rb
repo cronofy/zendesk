@@ -27,6 +27,16 @@ class ReminderSynchronizer
     @user = user
   end
 
+  def setup_sync
+    if ENV["CALLBACKS_ENABLED"].to_i > 0
+      callback_url = cronofy_callback_url(id: user.cronofy_id)
+      create_cronofy_notification_channel(callback_url)
+    end
+
+    SyncRemindersFromEvernote.perform_later(user.id)
+    SyncRemindersFromCronofy.perform_later(user.id)
+  end
+
   def writable_calendars
     cronofy_request do
       cronofy_client.list_calendars.reject(&:calendar_readonly)
@@ -46,12 +56,6 @@ class ReminderSynchronizer
     user.save
   end
 
-  def create_cronofy_notification_channel(callback_url)
-    cronofy_request do
-      cronofy_client.create_channel(callback_url)
-    end
-  end
-
   def sync_changed_events
     sync_start = current_time
 
@@ -66,6 +70,12 @@ class ReminderSynchronizer
   end
 
   private
+
+  def create_cronofy_notification_channel(callback_url)
+    cronofy_request do
+      cronofy_client.create_channel(callback_url)
+    end
+  end
 
   def changed_events
     args = {

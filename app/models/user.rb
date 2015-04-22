@@ -25,6 +25,10 @@ class User < ActiveRecord::Base
     user
   end
 
+  def active?
+    all_credentials? and cronofy_calendar_id.present?
+  end
+
   def all_credentials?
     cronofy_credentials? and evernote_credentials?
   end
