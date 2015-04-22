@@ -279,7 +279,7 @@ class ReminderSynchronizer
   end
 
   def evernote_client
-    @evernote_client ||= EvernoteOAuth::Client.new(token: user.evernote_access_token)
+    @evernote_client ||= EvernoteOAuth::Client.new(token: user.evernote_access_token, service_host: ENV['EVERNOTE_SERVICE_HOST'] || 'sandbox.evernote.com')
   end
 
   def evernote_note_store
