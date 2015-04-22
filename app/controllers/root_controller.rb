@@ -9,7 +9,6 @@ class RootController < ApplicationController
 
       flash[:info] = "Calendar ID set"
 
-      callback_url = cronofy_callback_url(id: user.cronofy_id)
       setup_sync
     else
       flash[:alert] = "Must be connected to your calendar account before we do that"
