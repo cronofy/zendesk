@@ -6,7 +6,7 @@ class SyncRemindersFromEvernote < ActiveJob::Base
   def perform(user_id)
     log.info { "Entering #perform(user_id=#{user_id})" }
 
-    user = User.find(user_id)
+    user = User.find_by_id(user_id)
 
     if user
       if user.all_credentials?
