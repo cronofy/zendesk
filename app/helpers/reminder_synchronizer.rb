@@ -28,22 +28,36 @@ class ReminderSynchronizer
   end
 
   def setup_sync
+    log.info { "Entering #setup_sync - user=#{user.id}" }
+
     if ENV["CALLBACKS_ENABLED"].to_i > 0
       callback_url = cronofy_callback_url(id: user.cronofy_id)
       create_cronofy_notification_channel(callback_url)
+    else
+      log.info { "Callbacks not enabled - user=#{user.id}" }
     end
 
     SyncRemindersFromEvernote.perform_later(user.id)
     SyncRemindersFromCronofy.perform_later(user.id)
+
+    log.info { "Exiting #setup_sync - user=#{user.id}" }
   end
 
   def writable_calendars
-    cronofy_request do
+    log.info { "Entering #writable_calendars - user=#{user.id}" }
+
+    calendars = cronofy_request do
       cronofy_client.list_calendars.reject(&:calendar_readonly)
     end
+
+    log.info { "Exiting #writable_calendars - result=#{calendars.count} calendars -  user=#{user.id}" }
+
+    calendars
   end
 
   def sync_changed_notes
+    log.info { "Entering #sync_changed_notes - user=#{user.id}" }
+
     notes, highest_usn = evernote_request { changed_notes }
 
     notes.each do |note|
@@ -54,9 +68,13 @@ class ReminderSynchronizer
 
     user.evernote_high_usn = highest_usn
     user.save
+
+    log.info { "Exiting #sync_changed_notes - user=#{user.id}" }
   end
 
   def sync_changed_events
+    log.info { "Entering #sync_changed_events - user=#{user.id}" }
+
     sync_start = current_time
 
     events = changed_events
@@ -67,6 +85,8 @@ class ReminderSynchronizer
 
     user.cronofy_last_modified = sync_start
     user.save
+
+    log.info { "Exiting #sync_changed_events - user=#{user.id}" }
   end
 
   private

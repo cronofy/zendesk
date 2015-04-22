@@ -11,8 +11,9 @@ class RootController < ApplicationController
       reminder_synchronizer.setup_sync
     else
       flash[:alert] = "Must be connected to your calendar account before we do that"
-      redirect_to :root
     end
+
+    redirect_to :root
   end
 
   def sync
