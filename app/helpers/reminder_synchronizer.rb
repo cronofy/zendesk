@@ -27,11 +27,10 @@ class ReminderSynchronizer
     @user = user
   end
 
-  def setup_sync
+  def setup_sync(callback_url)
     log.info { "Entering #setup_sync - user=#{user.id}" }
 
     if ENV["CALLBACKS_ENABLED"].to_i > 0
-      callback_url = cronofy_callback_url(id: user.cronofy_id)
       create_cronofy_notification_channel(callback_url)
     else
       log.info { "Callbacks not enabled - user=#{user.id}" }

@@ -5,10 +5,12 @@ class RootController < ApplicationController
   def calendar
     if logged_in?
       current_user.set_cronofy_calendar_id(params[:calendar_id])
-      current_user.save(current_user)
+      current_user.save
+
       flash[:info] = "Calendar ID set"
 
-      reminder_synchronizer.setup_sync
+      callback_url = cronofy_callback_url(id: user.cronofy_id)
+      setup_sync
     else
       flash[:alert] = "Must be connected to your calendar account before we do that"
     end
@@ -18,8 +20,7 @@ class RootController < ApplicationController
 
   def sync
     if current_user.active?
-      reminder_synchronizer.setup_sync
-
+      setup_sync
       flash[:info] = "Note reminders synced"
     end
 
@@ -59,6 +60,11 @@ class RootController < ApplicationController
   end
 
   helper_method :grouped_calendars
+
+  def setup_sync
+    callback_url = cronofy_callback_url(id: current_user.cronofy_id)
+    reminder_synchronizer.setup_sync(callback_url)
+  end
 
   def reminder_synchronizer
     @reminder_synchronizer ||= ReminderSynchronizer.new(current_user)
