@@ -84,14 +84,14 @@
               <div class="panel panel-primary">
                   <div class="panel-heading" role="tab" id="headingTwo">
                       <h4 class="panel-title">
-                          <a class="collapsed" href="step2.html">
+                          <a class="collapsed" href="#">
                               2. Connect with Evernote
                           </a>
                       </h4>
                   </div>
                   <div id="collapseTwo" class="panel-collapse collapse in" role="tabpanel">
                       <div class="panel-body">
-                          <p><a class="btn btn-success" href="step3.html">Create connection</a></p>
+                          <p><a class="btn btn-success" href="/auth/evernote">Create connection</a></p>
                           <p class="text-muted">You will be taken to authorise this app with Evernote.</p>
                       </div>
                   </div>
@@ -104,7 +104,7 @@
                 <div class="panel panel-success">
                     <div class="panel-heading" role="tab" id="headingTwo">
                         <h4 class="panel-title">
-                            <a class="collapsed" href="step2.html">
+                            <a class="collapsed" href="#">
                                 <span class="glyphicon glyphicon-ok"></span> Connected to Evernote
                             </a>
                         </h4>
@@ -116,7 +116,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading" role="tab" id="headingTwo">
                         <h4 class="panel-title">
-                            <a class="collapsed" href="step2.html">
+                            <a class="collapsed" href="#">
                                 2. Connect with Evernote
                             </a>
                         </h4>
@@ -146,7 +146,7 @@
                               <%= select_tag "calendar_id", grouped_options_for_select(grouped_calendars, current_user.cronofy_calendar_id) %>
                             </div>
 
-                            <%= submit_tag 'Save settings', class: 'btn btn-success', data: { disable_with: "Setting calendar..." } %>
+                            <%= submit_tag 'Start Sync', class: 'btn btn-success', data: { disable_with: "Starting sync..." } %>
                           <% end %>
                       </div>
                   </div>
@@ -195,13 +195,14 @@
 
         </div>
 
+        <% if logged_in? %>
+          <div class="app-undo">
+                <%= button_to 'Logout', session_path, method: :delete, class: 'btn btn-link' %>
+                <%= button_to 'Delete Account', '/', method: :delete, data: { confirm: "Are you sure?", disable_with: "Deleting..." }, class: 'btn btn-link' %>
+          </div>
+        <% end %>
+
     </div>
 </section>
 
-<% if logged_in? %>
-  <div class="app-undo">
-        <%= button_to 'Logout', session_path, method: :delete, class: 'btn btn-link' %>
-        <%= button_to 'Delete Account', '/', method: :delete, data: { confirm: "Are you sure?", disable_with: "Deleting..." }, class: 'btn btn-link' %>
-  </div>
-<% end %>
 
