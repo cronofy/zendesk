@@ -9,16 +9,21 @@
   <%= render partial: 'shared/head' %>
 </head>
 <body>
-  <div class="container">
-    <h1>Evernote Calendar Connector</h1>
 
-    <p>
-    Keep your Evernote reminders synchronized with your calendar.
-    </p>
+<header class="app-wrapper app-header">
+    <div class="app-container">
 
-    <%= yield %>
+        <div class="site-title">
+            <%= image_tag("logo.png", alt: "Evernote Calendar Connector", class: "site-logo") %>
+            Evernote Calendar Connector
+        </div>
 
-    <%= render partial: 'shared/footer' %>
-  </div>
+    </div>
+</header>
+
+<%= yield %>
+
+<%= render partial: 'shared/footer' %>
+
 </body>
 </html>

@@ -1,5 +1,32 @@
 class RootController < ApplicationController
+
+  helper_method :evernote_credentials?,
+                :render_cronofy_auth?,
+                :render_evernote_auth?,
+                :render_settings?,
+                :setup_complete?
+
   def show
+  end
+
+  def render_cronofy_auth?
+    !(logged_in? && current_user.cronofy_credentials?)
+  end
+
+  def render_evernote_auth?
+    logged_in? && current_user.cronofy_credentials? && !current_user.evernote_credentials?
+  end
+
+  def render_settings?
+    logged_in? && current_user.cronofy_credentials? && current_user.evernote_credentials?
+  end
+
+  def evernote_credentials?
+    logged_in? && current_user.evernote_credentials?
+  end
+
+  def setup_complete?
+    logged_in? && current_user.cronofy_credentials? && current_user.evernote_credentials? && current_user.cronofy_calendar_id
   end
 
   def calendar

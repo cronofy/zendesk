@@ -1,95 +1,207 @@
-<% flash.each do |type, message| %>
-  <div class="row">
-    <div class="alert alert-<%= type %> fade in col-md-4" role="alert">
-      <button class="close" data-dismiss="alert">×</button>
-      <%= message %>
+<section class="app-wrapper app-intro">
+    <div class="app-container">
+
+        <h1 class="app-intro__headline">Sync reminders <br> to your calendar</h1>
+      <% unless logged_in? %>
+        <p class="app-intro__summary">Calendar Connector turns your Evernote reminders into calendar events, then keeps any changes syncronised. Say goodbye to manual duplication.</p>
+        <div class="app-graphic">
+            <%= image_tag("cronofy-banner-mobile.png", class: "app-graphic__image app-graphic__image--small", alt:"How Evernote and your Calendar are syncronised") %>
+            <%= image_tag("cronofy-banner.png", class: "app-graphic__image app-graphic__image--large", alt:"How Evernote and your Calendar are syncronised") %>
+            <%= image_tag("cronofy-banner-dots.png", class:"app-graphic__image app-graphic__image--large__dots", alt:"How Evernote and your Calendar are syncronised") %>
+            <ul class="app-graphic__captions">
+                <li class="app-graphic__step app-graphic__step--1">Create a new reminder <br> within Evernote</li>
+                <li class="app-graphic__step app-graphic__step--2">A calendar event is <br> made automatically</li>
+                <li class="app-graphic__step app-graphic__step--3">Edits in either place <br> are syncronised</li>
+            </ul>
+            <div class="app-pulses">
+                <div class="app-pulse__block app-pulse__block--1">
+                    <span class="app-pulse app-pulse--1"></span>
+                    <span class="app-pulse app-pulse--2"></span>
+                    <span class="app-pulse app-pulse--3"></span>
+                    <span class="app-pulse app-pulse--4"></span>
+                </div>
+                <div class="app-pulse__block app-pulse__block--2">
+                    <span class="app-pulse app-pulse--5"></span>
+                    <span class="app-pulse app-pulse--6"></span>
+                    <span class="app-pulse app-pulse--7"></span>
+                </div>
+                <div class="app-pulse__block app-pulse__block--3">
+                    <span class="app-pulse app-pulse--8"></span>
+                    <span class="app-pulse app-pulse--9"></span>
+                    <span class="app-pulse app-pulse--10"></span>
+                    <span class="app-pulse app-pulse--11"></span>
+                    <span class="app-pulse app-pulse--12"></span>
+                    <span class="app-pulse app-pulse--13"></span>
+                </div>
+
+            </div>
+        </div>
+      <% end %>
     </div>
+</section>
+
+<section class="app-wrapper app-steps">
+  <div class="app-container">
+
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
+        <% unless setup_complete? %>
+            <% if render_cronofy_auth? %>
+
+              <div class="panel panel-primary">
+
+                  <div class="panel-heading" role="tab" id="headingOne">
+                      <h4 class="panel-title">
+                          <a href="" aria-expanded="true" aria-controls="collapseOne">
+                              1. Connect your calendar
+                          </a>
+                      </h4>
+                  </div>
+                  <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel">
+                      <div class="panel-body">
+                          <p><a href="/auth/cronofy" type="button" class="btn btn-success">Create connection</a></p>
+                          <p class="text-muted">You will be taken to authorise this app with your calendar.</p>
+                      </div>
+                  </div>
+              </div>
+
+            <% else %>
+
+              <div class="panel panel-success">
+                  <div class="panel-heading" role="tab" id="headingOne">
+                      <h4 class="panel-title">
+                          <a href="index.html">
+                              <span class="glyphicon glyphicon-ok"></span> Connected to calendars for: <span class="text-muted"><%= current_user.email %></span>
+                          </a>
+                      </h4>
+                  </div>
+              </div>
+
+            <% end %>
+
+            <% if render_evernote_auth? %>
+
+              <div class="panel panel-primary">
+                  <div class="panel-heading" role="tab" id="headingTwo">
+                      <h4 class="panel-title">
+                          <a class="collapsed" href="step2.html">
+                              2. Connect with Evernote
+                          </a>
+                      </h4>
+                  </div>
+                  <div id="collapseTwo" class="panel-collapse collapse in" role="tabpanel">
+                      <div class="panel-body">
+                          <p><a class="btn btn-success" href="step3.html">Create connection</a></p>
+                          <p class="text-muted">You will be taken to authorise this app with Evernote.</p>
+                      </div>
+                  </div>
+              </div>
+
+            <% else %>
+
+              <% if evernote_credentials? %>
+
+                <div class="panel panel-success">
+                    <div class="panel-heading" role="tab" id="headingTwo">
+                        <h4 class="panel-title">
+                            <a class="collapsed" href="step2.html">
+                                <span class="glyphicon glyphicon-ok"></span> Connected to Evernote
+                            </a>
+                        </h4>
+                    </div>
+                </div>
+
+              <% else %>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingTwo">
+                        <h4 class="panel-title">
+                            <a class="collapsed" href="step2.html">
+                                2. Connect with Evernote
+                            </a>
+                        </h4>
+                    </div>
+                </div>
+
+              <% end %>
+
+            <% end %>
+
+
+            <% if render_settings? %>
+
+              <div class="panel panel-primary">
+                  <div class="panel-heading" role="tab" id="headingThree">
+                      <h4 class="panel-title">
+                          <a class="collapsed" ref="#collapseThree">
+                              3. Choose your settings
+                          </a>
+                      </h4>
+                  </div>
+                  <div id="collapseThree" class="panel-collapse collapse in" role="tabpanel">
+                      <div class="panel-body">
+                          <%= form_tag calendar_path do %>
+                            <div class="form-group">
+                              <label for="calendar_id">Select calendar</label>
+                              <%= select_tag "calendar_id", grouped_options_for_select(grouped_calendars, current_user.cronofy_calendar_id) %>
+                            </div>
+
+                            <%= submit_tag 'Save settings', class: 'btn btn-success', data: { disable_with: "Setting calendar..." } %>
+                          <% end %>
+                      </div>
+                  </div>
+              </div>
+
+            <% else %>
+
+              <div class="panel panel-default">
+                  <div class="panel-heading" role="tab" id="headingThree">
+                      <h4 class="panel-title">
+                          <a class="collapsed" href="step3.html">
+                              3. Choose your settings
+                          </a>
+                      </h4>
+                  </div>
+              </div>
+
+            <% end %>
+
+        <% else %>
+
+            <div class="panel panel-primary">
+                <div class="panel-heading" role="tab" id="headingOne">
+                    <h4 class="panel-title">
+                        <a class="collapsed" ref="#collapseOne">
+                            Connection active
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel">
+                    <div class="panel-body app-copy">
+                        <p>It may take a few minutes for your reminders to appear in your calendar. Once they are in your calendar, you can:</p>
+                        <ul>
+                            <li>alter the name of your note by changing the name of the event</li>
+                            <li>change the time of your reminder by moving the event</li>
+                            <li>remove the reminder by deleting the event</li>
+                        </ul>
+                        <div class="alert alert-success" role="alert">
+                            Changes you make in your calendar may take a few minutes to show up in Evernote. If you are using the web interface for Evernote, you may also need to refresh the page.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+          <% end %>
+
+        </div>
+
+    </div>
+</section>
+
+<% if logged_in? %>
+  <div class="app-undo">
+        <%= button_to 'Logout', session_path, method: :delete, class: 'btn btn-link' %>
+        <%= button_to 'Delete Account', '/', method: :delete, data: { confirm: "Are you sure?", disable_with: "Deleting..." }, class: 'btn btn-link' %>
   </div>
 <% end %>
 
-<% if logged_in? %>
-
-  <% if current_user.cronofy_credentials? %>
-
-    <p class="success">
-      <span class="glyphicon glyphicon-ok"></span> Connected to calendars for <strong><%= current_user.email %></strong>
-    </p>
-
-    <% if current_user.evernote_credentials? %>
-
-      <p class="success">
-        <span class="glyphicon glyphicon-ok"></span> Connected to <strong>Evernote</strong>
-      </p>
-
-      <% if current_user.cronofy_calendar_id %>
-
-        <h3>Connection active!</h3>
-        <p>
-        It may take a few minutes for your reminders to appear in your calendar.
-        </p>
-        <p>
-        Once they are in your calendar, you can alter the name of your note by
-        changing the name of the event, change the time of your reminder by
-        moving the event, and remove the reminder by deleting the event.
-        </p>
-        <p>
-        It may take a few minutes for changes you make in your calendar to
-        show up in Evernote. If you are using the web interface for Evernote,
-        you may also need to refresh the page.
-        </p>
-
-      <% else %>
-
-        <h2>Select calendar</h2>
-        <%= form_tag calendar_path do %>
-          <div class="form-group">
-            <label for="calendar_id">Select calendar</label>
-            <%= select_tag "calendar_id", grouped_options_for_select(grouped_calendars, current_user.cronofy_calendar_id) %>
-          </div>
-
-          <%= submit_tag 'Set target calendar', class: 'btn btn-success', data: { disable_with: "Setting calendar..." } %>
-        <% end %>
-
-      <% end %>
-
-    <% else # no evernote credentials %>
-
-      <% if current_user.evernote_user_id %>
-        <p>
-          Please reconnect your Evernote account.
-        </p>
-        <p>
-          <%= link_to "Reconnect to Evernote", "/auth/evernote", class: 'btn btn-success', data: { disable_with: "Connecting to Evernote..." }  %>
-        </p>
-      <% else %>
-        <p>
-          Next step is to connect your Evernote account.
-        </p>
-        <p>
-          <%= link_to "Connect to Evernote", "/auth/evernote", class: 'btn btn-success', data: { disable_with: "Connecting to Evernote..." }  %>
-        </p>
-      <% end %>
-
-    <% end %>
-
-  <% else # no cronofy credentials %>
-
-    <p>
-      Please reconnect to your calendar using the Cronofy Calendar API service.
-    </p>
-    <p>
-      <%= link_to "Reconnect your calendar", "/auth/cronofy", class: 'btn btn-success', data: { disable_with: "Connecting via Cronofy..." }  %>
-    </p>
-
-  <% end %>
-
-<% else # not logged in %>
-
-  <p>
-    First step is to connect to your calendar using the Cronofy Calendar API service.
-  </p>
-  <p>
-    <%= link_to "Connect your calendar", "/auth/cronofy", class: 'btn btn-success', data: { disable_with: "Connecting via Cronofy..." }  %>
-  </p>
-
-<% end %>

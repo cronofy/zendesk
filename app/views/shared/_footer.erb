@@ -1,10 +1,15 @@
-<footer>
-  <% if logged_in? %>
-    <p>
-      <div class="btn-group" role="group">
-        <%= button_to 'Logout', session_path, method: :delete, class: 'btn btn-link' %>
-        <%= button_to 'Delete Account', '/', method: :delete, data: { confirm: "Are you sure?", disable_with: "Deleting..." }, class: 'btn btn-link' %>
-      </div>
-    </p>
-  <% end %>
+<footer class="app-wrapper app-footer" role="contentinfo">
+
+    <div class="app-container">
+
+        <p class="app-footer__about"><span class="app-footer__brand"><a href="http://www.cronofy.com/"><%= image_tag("cronofy-icon.png", class: "app-footer__logo", alt:"Cronofy") %></a> Powered by Cronofy</span> One API for all calendars.</p>
+
+        <ul class="app-footer__links">
+            <li><a href="http://www.cronofy.com/developers">Developer Docs</a></li>
+            <li><a href="https://github.com/cronofy">Source Code</a></li>
+            <li><a href="http://www.cronofy.com/terms-of-service">Terms of Service</a></li>
+            <li><a href="http://www.cronofy.com/privacy-policy">Privacy Policy</a></li>
+        </ul>
+
+    </div>
 </footer>
