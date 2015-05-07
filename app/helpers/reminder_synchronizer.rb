@@ -21,6 +21,26 @@ class ReminderSynchronizer
     end
   end
 
+  class StubAttributes
+    def reminderTime
+      nil
+    end
+  end
+
+  ExpungedNote = Struct.new(:guid) do
+    def title
+      ""
+    end
+
+    def deleted
+      true
+    end
+
+    def attributes
+      @attributes ||= StubAttributes.new
+    end
+  end
+
   attr_reader :user
 
   def initialize(user)
@@ -57,7 +77,7 @@ class ReminderSynchronizer
   def sync_changed_notes
     log.info { "Entering #sync_changed_notes - user=#{user.id}" }
 
-    notes, highest_usn = self.evernote_request { changed_notes }
+    notes, highest_usn = evernote_request { changed_notes }
 
     notes.each do |note|
       cronofy_request do
@@ -74,12 +94,12 @@ class ReminderSynchronizer
   def sync_changed_events
     log.info { "Entering #sync_changed_events - user=#{user.id}" }
 
-    sync_start = self.current_time
+    sync_start = current_time
 
     events = changed_events
 
     events.each do |event|
-      self.evernote_request { update_evernote_reminder_from_event(event) }
+      evernote_request { update_evernote_reminder_from_event(event) }
     end
 
     user.cronofy_last_modified = sync_start
@@ -89,26 +109,6 @@ class ReminderSynchronizer
   end
 
   private
-
-  ExpungedNote = Struct.new(:guid) do
-    class StubAttributes
-      def reminderTime
-        nil
-      end
-    end
-
-    def title
-      ""
-    end
-
-    def deleted
-      true
-    end
-
-    def attributes
-      @attributes ||= StubAttributes.new
-    end
-  end
 
   def create_cronofy_notification_channel(callback_url)
     cronofy_request do
@@ -248,7 +248,7 @@ class ReminderSynchronizer
 
   # Wrapper for Cronofy API requests to handle refreshing the access token
   def cronofy_request(&block)
-    if user.cronofy_access_token_expired?(self.current_time)
+    if user.cronofy_access_token_expired?(current_time)
       log.info { "#cronofy_request pre-emptively refreshing expired token" }
       refresh_cronofy_access_token
     end
