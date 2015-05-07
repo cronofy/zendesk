@@ -74,7 +74,7 @@ class ReminderSynchronizer
   def sync_changed_events
     log.info { "Entering #sync_changed_events - user=#{user.id}" }
 
-    sync_start = current_time
+    sync_start = self.current_time
 
     events = changed_events
 
@@ -248,7 +248,7 @@ class ReminderSynchronizer
 
   # Wrapper for Cronofy API requests to handle refreshing the access token
   def cronofy_request(&block)
-    if user.cronofy_access_token_expired?(current_time)
+    if user.cronofy_access_token_expired?(self.current_time)
       log.info { "#cronofy_request pre-emptively refreshing expired token" }
       refresh_cronofy_access_token
     end
