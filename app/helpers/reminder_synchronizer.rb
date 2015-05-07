@@ -57,7 +57,7 @@ class ReminderSynchronizer
   def sync_changed_notes
     log.info { "Entering #sync_changed_notes - user=#{user.id}" }
 
-    notes, highest_usn = evernote_request { changed_notes }
+    notes, highest_usn = self.evernote_request { changed_notes }
 
     notes.each do |note|
       cronofy_request do
@@ -79,7 +79,7 @@ class ReminderSynchronizer
     events = changed_events
 
     events.each do |event|
-      evernote_request { update_evernote_reminder_from_event(event) }
+      self.evernote_request { update_evernote_reminder_from_event(event) }
     end
 
     user.cronofy_last_modified = sync_start
