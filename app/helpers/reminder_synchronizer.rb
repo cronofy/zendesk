@@ -21,6 +21,26 @@ class ReminderSynchronizer
     end
   end
 
+  class StubAttributes
+    def reminderTime
+      nil
+    end
+  end
+
+  ExpungedNote = Struct.new(:guid) do
+    def title
+      ""
+    end
+
+    def deleted
+      true
+    end
+
+    def attributes
+      @attributes ||= StubAttributes.new
+    end
+  end
+
   attr_reader :user
 
   def initialize(user)
@@ -66,26 +86,6 @@ class ReminderSynchronizer
   end
 
   private
-
-  ExpungedNote = Struct.new(:guid) do
-    class StubAttributes
-      def reminderTime
-        nil
-      end
-    end
-
-    def title
-      ""
-    end
-
-    def deleted
-      true
-    end
-
-    def attributes
-      @attributes ||= StubAttributes.new
-    end
-  end
 
   def changed_events
     args = {
