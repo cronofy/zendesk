@@ -68,7 +68,7 @@ class ReminderSynchronizer
   private
 
   ExpungedNote = Struct.new(:guid) do
-    StubAttributes = Struct.new do
+    class StubAttributes
       def reminderTime
         nil
       end
