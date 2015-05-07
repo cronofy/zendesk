@@ -90,6 +90,26 @@ class ReminderSynchronizer
 
   private
 
+  ExpungedNote = Struct.new(:guid) do
+    StubAttributes = Struct.new do
+      def reminderTime
+        nil
+      end
+    end
+
+    def title
+      ""
+    end
+
+    def deleted
+      true
+    end
+
+    def attributes
+      @attributes ||= StubAttributes.new
+    end
+  end
+
   def create_cronofy_notification_channel(callback_url)
     cronofy_request do
       cronofy_client.create_channel(callback_url)
@@ -127,8 +147,13 @@ class ReminderSynchronizer
     until highest_seen_usn == highest_usn
       sync_chunk = evernote_note_store.getFilteredSyncChunk(user.evernote_access_token, highest_seen_usn, max_entries, filter)
 
-      notes.concat(sync_chunk.notes)         if sync_chunk.notes
-      notes.concat(sync_chunk.expungedNotes) if sync_chunk.expungedNotes
+      notes.concat(sync_chunk.notes) if sync_chunk.notes
+
+      if sync_chunk.expungedNotes
+        # Need to map expunged guid into something that acts like a note
+        expunged_notes = sync_chunk.expungedNotes.map { |guid| ExpungedNote.new(guid) }
+        notes.concat(expunged_notes)
+      end
 
       highest_seen_usn = sync_chunk.chunkHighUSN
       highest_usn = sync_chunk.updateCount
