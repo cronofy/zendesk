@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  force_ssl if: :ssl_configured?
+
   def create
     log.debug { "#create #{auth_hash.inspect}" }
 

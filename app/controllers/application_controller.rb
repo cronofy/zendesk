@@ -27,4 +27,8 @@ class ApplicationController < ActionController::Base
   def current_time
     Time.now.getutc
   end
+
+  def ssl_configured?
+    Rails.env.production?
+  end
 end

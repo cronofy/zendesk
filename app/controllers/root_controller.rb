@@ -1,4 +1,5 @@
 class RootController < ApplicationController
+  force_ssl if: :ssl_configured?
 
   helper_method :evernote_credentials?,
                 :render_cronofy_auth?,

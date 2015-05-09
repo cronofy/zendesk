@@ -1,4 +1,6 @@
 class CronofyWebhooksController < ApplicationController
+  force_ssl if: :ssl_configured?
+
   skip_before_filter :verify_authenticity_token
 
   def inbound
