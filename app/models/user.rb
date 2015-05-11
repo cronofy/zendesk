@@ -33,6 +33,10 @@ class User < ActiveRecord::Base
     cronofy_credentials? and evernote_credentials?
   end
 
+  def first_note_sync?
+    self.evernote_high_usn > 0
+  end
+
   def cronofy_credentials?
     log.debug { "cronofy_id=#{cronofy_id}, cronofy_refresh_token=#{cronofy_refresh_token}" }
     !self.cronofy_id.blank? && !self.cronofy_refresh_token.blank?

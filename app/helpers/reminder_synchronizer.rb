@@ -77,11 +77,13 @@ class ReminderSynchronizer
   def sync_changed_notes
     log.info { "Entering #sync_changed_notes - user=#{user.id}" }
 
+    skip_deletes = user.first_note_sync?
+
     notes, highest_usn = evernote_request { changed_notes }
 
     notes.each do |note|
       cronofy_request do
-        update_event(note)
+        update_event(note, skip_deletes: skip_deletes)
       end
     end
 
@@ -194,12 +196,16 @@ class ReminderSynchronizer
     end
   end
 
-  def update_event(note)
+  def update_event(note, opts = {})
     event = note_as_event(note)
 
     if event[:event_deleted]
-      log.info { "Deleting #{event[:event_id]}" }
-      cronofy_client.delete_event(user.cronofy_calendar_id, event[:event_id])
+      if opts.fetch(:skip_deletes, false)
+        log.info { "Skipping deletion of #{event[:event_id]}" }
+      else
+        log.info { "Deleting #{event[:event_id]}" }
+        cronofy_client.delete_event(user.cronofy_calendar_id, event[:event_id])
+      end
     else
       log.info { "Upserting #{event[:event_id]}" }
       cronofy_client.upsert_event(user.cronofy_calendar_id, event[:attributes])
