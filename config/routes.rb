@@ -13,4 +13,7 @@ Rails.application.routes.draw do
   get "/auth/failure", to: "sessions#failure"
 
   resource :session
+
+  match '*a', to: 'root#not_found', via: :all
+  match '/',  to: 'root#not_found', via: :all
 end

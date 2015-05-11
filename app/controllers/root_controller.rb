@@ -10,6 +10,15 @@ class RootController < ApplicationController
   def show
   end
 
+  def not_found
+    log.warn { "#not_found - #{request.fullpath}" }
+
+    respond_to do |format|
+      format.html { render status: 404 }
+      format.all { render nothing: true, status: 404 }
+    end
+  end
+
   def render_cronofy_auth?
     !(logged_in? && current_user.cronofy_credentials?)
   end
