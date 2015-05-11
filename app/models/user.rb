@@ -34,7 +34,7 @@ class User < ActiveRecord::Base
   end
 
   def first_note_sync?
-    self.evernote_high_usn > 0
+    self.evernote_high_usn == 0
   end
 
   def cronofy_credentials?

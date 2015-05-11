@@ -79,6 +79,8 @@ class ReminderSynchronizer
 
     skip_deletes = user.first_note_sync?
 
+    log.info { "#sync_changed_notes - user=#{user.id} - skip_deletes=#{skip_deletes}" }
+
     notes, highest_usn = evernote_request { changed_notes }
 
     notes.each do |note|
