@@ -1,3 +1,11 @@
+<script type="text/javascript">
+
+_kmq.push(['trackClickOnOutboundLink', 'connect_cronofy', 'connect_cronofy']);
+_kmq.push(['trackClickOnOutboundLink', 'connect_evernote', 'connect_evernote']);
+_kmq.push(['trackSubmit', 'sync_settings', 'sync_settings']);
+
+</script>
+
 <section class="app-wrapper app-intro">
     <div class="app-container">
 
@@ -59,7 +67,7 @@
                   </div>
                   <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel">
                       <div class="panel-body">
-                          <p><a href="/auth/cronofy" type="button" class="btn btn-success">Create connection</a></p>
+                          <p><a id="connect_cronofy" href="/auth/cronofy" type="button" class="btn btn-success">Create connection</a></p>
                           <p class="text-muted">You will be taken to authorise this app with your calendar.</p>
                       </div>
                   </div>
@@ -91,7 +99,7 @@
                   </div>
                   <div id="collapseTwo" class="panel-collapse collapse in" role="tabpanel">
                       <div class="panel-body">
-                          <p><a class="btn btn-success" href="/auth/evernote">Create connection</a></p>
+                          <p><a id="connect_evernote" class="btn btn-success" href="/auth/evernote">Create connection</a></p>
                           <p class="text-muted">You will be taken to authorise this app with Evernote.</p>
                       </div>
                   </div>
@@ -140,7 +148,7 @@
                   </div>
                   <div id="collapseThree" class="panel-collapse collapse in" role="tabpanel">
                       <div class="panel-body">
-                          <%= form_tag calendar_path do %>
+                          <%= form_tag calendar_path, id: 'sync_settings' do %>
                             <div class="form-group">
                               <label for="calendar_id">Select calendar</label>
                               <%= select_tag "calendar_id", grouped_options_for_select(grouped_calendars, current_user.cronofy_calendar_id) %>
