@@ -1,9 +1,9 @@
 class RootController < ApplicationController
   force_ssl if: :ssl_configured?
 
-  helper_method :evernote_credentials?,
+  helper_method :zendesk_credentials?,
                 :render_cronofy_auth?,
-                :render_evernote_auth?,
+                :render_zendesk_auth?,
                 :render_settings?,
                 :setup_complete?
 
@@ -23,20 +23,20 @@ class RootController < ApplicationController
     !(logged_in? && current_user.cronofy_credentials?)
   end
 
-  def render_evernote_auth?
-    logged_in? && current_user.cronofy_credentials? && !current_user.evernote_credentials?
+  def render_zendesk_auth?
+    logged_in? && current_user.cronofy_credentials? && !current_user.zendesk_credentials?
   end
 
   def render_settings?
-    logged_in? && current_user.cronofy_credentials? && current_user.evernote_credentials?
+    logged_in? && current_user.cronofy_credentials? && current_user.zendesk_credentials?
   end
 
-  def evernote_credentials?
-    logged_in? && current_user.evernote_credentials?
+  def zendesk_credentials?
+    logged_in? && current_user.zendesk_credentials?
   end
 
   def setup_complete?
-    logged_in? && current_user.cronofy_credentials? && current_user.evernote_credentials? && current_user.cronofy_calendar_id
+    logged_in? && current_user.cronofy_credentials? && current_user.zendesk_credentials? && current_user.cronofy_calendar_id
   end
 
   def calendar
@@ -66,7 +66,7 @@ class RootController < ApplicationController
   def reset
     if logged_in?
       current_user.cronofy_calendar_id = nil
-      current_user.evernote_high_usn = 0
+      current_user.zendesk_high_usn = 0
       current_user.save(current_user)
 
       flash[:info] = "Syncing reset"

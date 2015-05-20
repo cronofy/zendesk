@@ -1,7 +1,7 @@
 <script type="text/javascript">
 
 _kmq.push(['trackClickOnOutboundLink', 'connect_cronofy', 'connect_cronofy']);
-_kmq.push(['trackClickOnOutboundLink', 'connect_evernote', 'connect_evernote']);
+_kmq.push(['trackClickOnOutboundLink', 'connect_zendesk', 'connect_zendesk']);
 _kmq.push(['trackSubmit', 'sync_settings', 'sync_settings']);
 
 </script>
@@ -9,15 +9,15 @@ _kmq.push(['trackSubmit', 'sync_settings', 'sync_settings']);
 <section class="app-wrapper app-intro">
     <div class="app-container">
 
-        <h1 class="app-intro__headline">Sync reminders <br> to your calendar</h1>
+        <h1 class="app-intro__headline">Sync tasks <br> to your calendar</h1>
       <% unless logged_in? %>
-        <p class="app-intro__summary">Calendar Connector turns your Evernote reminders into calendar events, then keeps any changes syncronised. Say goodbye to manual duplication.</p>
+        <p class="app-intro__summary">Calendar Connector turns your Zendesk tasks into calendar events, then keeps any changes syncronised. Say goodbye to manual duplication.</p>
         <div class="app-graphic">
-            <%= image_tag("cronofy-banner-mobile.png", class: "app-graphic__image app-graphic__image--small", alt:"How Evernote and your Calendar are syncronised") %>
-            <%= image_tag("cronofy-banner.png", class: "app-graphic__image app-graphic__image--large", alt:"How Evernote and your Calendar are syncronised") %>
-            <%= image_tag("cronofy-banner-dots.png", class:"app-graphic__image app-graphic__image--large__dots", alt:"How Evernote and your Calendar are syncronised") %>
+            <%= image_tag("cronofy-banner-mobile.png", class: "app-graphic__image app-graphic__image--small", alt:"How Zendesk and your Calendar are syncronised") %>
+            <%= image_tag("cronofy-banner.png", class: "app-graphic__image app-graphic__image--large", alt:"How Zendesk and your Calendar are syncronised") %>
+            <%= image_tag("cronofy-banner-dots.png", class:"app-graphic__image app-graphic__image--large__dots", alt:"How Zendesk and your Calendar are syncronised") %>
             <ul class="app-graphic__captions">
-                <li class="app-graphic__step app-graphic__step--1">Create a new reminder <br> within Evernote</li>
+                <li class="app-graphic__step app-graphic__step--1">Create a new reminder <br> within Zendesk</li>
                 <li class="app-graphic__step app-graphic__step--2">A calendar event is <br> made automatically</li>
                 <li class="app-graphic__step app-graphic__step--3">Edits in either place <br> are syncronised</li>
             </ul>
@@ -87,33 +87,33 @@ _kmq.push(['trackSubmit', 'sync_settings', 'sync_settings']);
 
             <% end %>
 
-            <% if render_evernote_auth? %>
+            <% if render_zendesk_auth? %>
 
               <div class="panel panel-primary">
                   <div class="panel-heading" role="tab" id="headingTwo">
                       <h4 class="panel-title">
                           <a class="collapsed" href="#">
-                              2. Connect with Evernote
+                              2. Connect with Zendesk
                           </a>
                       </h4>
                   </div>
                   <div id="collapseTwo" class="panel-collapse collapse in" role="tabpanel">
                       <div class="panel-body">
-                          <p><a id="connect_evernote" class="btn btn-success" href="/auth/evernote">Create connection</a></p>
-                          <p class="text-muted">You will be taken to authorise this app with Evernote.</p>
+                          <p><a id="connect_zendesk" class="btn btn-success" href="/auth/zendesk">Create connection</a></p>
+                          <p class="text-muted">You will be taken to authorise this app with Zendesk.</p>
                       </div>
                   </div>
               </div>
 
             <% else %>
 
-              <% if evernote_credentials? %>
+              <% if zendesk_credentials? %>
 
                 <div class="panel panel-success">
                     <div class="panel-heading" role="tab" id="headingTwo">
                         <h4 class="panel-title">
                             <a class="collapsed" href="#">
-                                <span class="glyphicon glyphicon-ok"></span> Connected to Evernote
+                                <span class="glyphicon glyphicon-ok"></span> Connected to Zendesk
                             </a>
                         </h4>
                     </div>
@@ -125,7 +125,7 @@ _kmq.push(['trackSubmit', 'sync_settings', 'sync_settings']);
                     <div class="panel-heading" role="tab" id="headingTwo">
                         <h4 class="panel-title">
                             <a class="collapsed" href="#">
-                                2. Connect with Evernote
+                                2. Connect with Zendesk
                             </a>
                         </h4>
                     </div>
@@ -186,14 +186,14 @@ _kmq.push(['trackSubmit', 'sync_settings', 'sync_settings']);
                 </div>
                 <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel">
                     <div class="panel-body app-copy">
-                        <p>It may take a few minutes for your reminders to appear in your calendar. Once they are in your calendar, you can:</p>
+                        <p>It may take a few minutes for your tasks to appear in your calendar. Once they are in your calendar, you can:</p>
                         <ul>
                             <li>alter the name of your note by changing the name of the event</li>
                             <li>change the time of your reminder by moving the event</li>
                             <li>remove the reminder by deleting the event</li>
                         </ul>
                         <div class="alert alert-success" role="alert">
-                            Changes you make in your calendar may take a few minutes to show up in Evernote. If you are using the web interface for Evernote, you may also need to refresh the page.
+                            Changes you make in your calendar may take a few minutes to show up in Zendesk. If you are using the web interface for Zendesk, you may also need to refresh the page.
                         </div>
                     </div>
                 </div>

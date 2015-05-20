@@ -12,11 +12,11 @@ class ReminderSynchronizer
     end
   end
 
-  class EvernoteCredentialsInvalid < StandardError
+  class ZendeskCredentialsInvalid < StandardError
     attr_reader :user_id
 
     def initialize(user_id)
-      super("Evernote credentials invalid for user=#{user_id}")
+      super("Zendesk credentials invalid for user=#{user_id}")
       @user_id = user_id
     end
   end

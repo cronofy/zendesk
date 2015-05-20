@@ -1,4 +1,4 @@
-class SyncRemindersFromEvernote < ActiveJob::Base
+class SyncRemindersFromZendesk < ActiveJob::Base
   include Hatchet
 
   queue_as :default

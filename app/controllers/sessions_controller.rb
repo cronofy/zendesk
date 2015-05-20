@@ -8,9 +8,9 @@ class SessionsController < ApplicationController
     when 'cronofy'
       process_cronofy_login(auth_hash)
       flash[:success] = "Connected to your calendars"
-    when 'evernote'
-      process_evernote_login(auth_hash)
-      flash[:success] = "Connected to Evernote"
+    when 'zendesk'
+      process_zendesk_login(auth_hash)
+      flash[:success] = "Connected to Zendesk"
     else
       log.warn { "#create provider=#{auth_hash['provider']} not recognised" }
       flash[:error] = "Unrecognised provider login"
@@ -22,8 +22,8 @@ class SessionsController < ApplicationController
     case params[:strategy]
     when "cronofy"
       flash[:alert] = "Unable to connect to your calendars: #{params[:message]}"
-    when "evernote"
-      flash[:alert] = "Unable to connect to your Evernote account: #{params[:message]}"
+    when "zendesk"
+      flash[:alert] = "Unable to connect to your Zendesk account: #{params[:message]}"
     else
       flash[:error] = "Failure from unrecognised provider"
     end
@@ -55,10 +55,10 @@ class SessionsController < ApplicationController
     setup_sync(user)
   end
 
-  def process_evernote_login(auth_hash)
+  def process_zendesk_login(auth_hash)
     log.debug { "auth_hash=#{auth_hash.inspect}" }
-    current_user.evernote_user_id = auth_hash['uid']
-    current_user.evernote_access_token = auth_hash['credentials']['token']
+    current_user.zendesk_user_id = auth_hash['uid']
+    current_user.zendesk_access_token = auth_hash['credentials']['token']
     current_user.save
 
     setup_sync(current_user)

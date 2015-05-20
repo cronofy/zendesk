@@ -24,10 +24,10 @@ class SyncRemindersFromCronofy < ActiveJob::Base
     log.warn { "#{e.class} - #{e.message}" }
     User.remove_cronofy_credentials(e.user_id)
     RelinkMailer.relink_cronofy(e.user_id).deliver_later
-  rescue ReminderSynchronizer::EvernoteCredentialsInvalid => e
+  rescue ReminderSynchronizer::ZendeskCredentialsInvalid => e
     log.warn { "#{e.class} - #{e.message}" }
-    User.remove_evernote_credentials(e.user_id)
-    RelinkMailer.relink_evernote(e.user_id).deliver_later
+    User.remove_zendesk_credentials(e.user_id)
+    RelinkMailer.relink_zendesk(e.user_id).deliver_later
   rescue => e
     log.error "Error within #perform(user_id=#{user_id}) - #{e.message}", e
     raise

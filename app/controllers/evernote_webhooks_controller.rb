@@ -1,12 +1,12 @@
-class EvernoteWebhooksController < ApplicationController
+class ZendeskWebhooksController < ApplicationController
   skip_before_filter :verify_authenticity_token
 
   def inbound
     log.info { "#inbound - params=#{params.inspect}" }
-    user = User.find_by(evernote_user_id: params[:userId])
+    user = User.find_by(zendesk_user_id: params[:userId])
 
     if user
-      SyncRemindersFromEvernote.perform_later(user.id)
+      SyncRemindersFromZendesk.perform_later(user.id)
       render nothing: true, status: :ok
     else
       render nothing: true, status: :not_found

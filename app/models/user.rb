@@ -14,14 +14,14 @@ class User < ActiveRecord::Base
     user
   end
 
-  def self.remove_evernote_credentials(id)
-    log.info { "Entering .remove_evernote_credentials(id=#{id})" }
+  def self.remove_zendesk_credentials(id)
+    log.info { "Entering .remove_zendesk_credentials(id=#{id})" }
     user = User.find(id)
 
-    user.evernote_access_token = nil
+    user.zendesk_access_token = nil
     user.save
 
-    log.info { "Exiting .remove_evernote_credentials(id=#{id})" }
+    log.info { "Exiting .remove_zendesk_credentials(id=#{id})" }
     user
   end
 
@@ -30,11 +30,11 @@ class User < ActiveRecord::Base
   end
 
   def all_credentials?
-    cronofy_credentials? and evernote_credentials?
+    cronofy_credentials? and zendesk_credentials?
   end
 
   def first_note_sync?
-    self.evernote_high_usn == 0
+    self.zendesk_high_usn == 0
   end
 
   def cronofy_credentials?
@@ -42,16 +42,16 @@ class User < ActiveRecord::Base
     !self.cronofy_id.blank? && !self.cronofy_refresh_token.blank?
   end
 
-  def evernote_credentials?
-    log.debug { "evernote_user_id=#{evernote_user_id}, evernote_access_token=#{evernote_access_token}" }
-    !self.evernote_user_id.blank? && !self.evernote_access_token.blank?
+  def zendesk_credentials?
+    log.debug { "zendesk_user_id=#{zendesk_user_id}, zendesk_access_token=#{zendesk_access_token}" }
+    !self.zendesk_user_id.blank? && !self.zendesk_access_token.blank?
   end
 
   def set_cronofy_calendar_id(calendar_id)
     raise "calendar_id required" if calendar_id.blank?
 
     self.cronofy_calendar_id = calendar_id
-    self.evernote_high_usn = 0
+    self.zendesk_high_usn = 0
   end
 
   def cronofy_access_token_expired?(time)

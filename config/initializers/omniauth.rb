@@ -3,8 +3,11 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     scope: "read_account list_calendars read_events create_event delete_event"
   }
 
-  evernote_site = ENV['EVERNOTE_SITE'] || "https://www.evernote.com"
-  provider :evernote, ENV['EVERNOTE_KEY'], ENV['EVERNOTE_SECRET'], client_options: { site: evernote_site }
+  zendesk_site = ENV['ZENDESK_SITE'] || "https://cronofy.zendesk.com"
+  provider :zendesk, ENV['ZENDESK_CLIENT_ID'], ENV['ZENDESK_CLIENT_SECRET'], {
+    scope: "read write",
+    client_options: { site: zendesk_site }
+  }
 end
 
 class OmniAuthLogger

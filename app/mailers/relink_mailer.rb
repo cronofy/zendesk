@@ -3,7 +3,7 @@ class RelinkMailer < ActionMailer::Base
 
   layout 'mail'
 
-  default from: "Evernote Calendar Connector <#{ENV["FROM_EMAIL_ADDRESS"] || "bot@cronofy.com"}>"
+  default from: "Zendesk Calendar Connector <#{ENV["FROM_EMAIL_ADDRESS"] || "bot@cronofy.com"}>"
 
   def relink_cronofy(user_id)
     user = User.find(user_id)
@@ -14,12 +14,12 @@ class RelinkMailer < ActionMailer::Base
       subject: "Reconnect your calendar account"
   end
 
-  def relink_evernote(user_id)
+  def relink_zendesk(user_id)
     user = User.find(user_id)
 
-    @url = root_url(relink: true, provider: "evernote")
+    @url = root_url(relink: true, provider: "zendesk")
 
     mail to: user.email,
-      subject: "Reconnect your Evernote account"
+      subject: "Reconnect your Zendesk account"
   end
 end

@@ -13,10 +13,10 @@ gem 'delayed_job_active_record'
 gem 'unicorn'
 
 gem 'cronofy'
-gem 'evernote_oauth'
+gem 'zendesk_api'
 
 gem 'omniauth-cronofy'
-gem 'omniauth-evernote'
+gem 'omniauth-zendesk-oauth2'
 
 gem 'hatchet'
 
