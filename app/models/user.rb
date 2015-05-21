@@ -25,6 +25,10 @@ class User < ActiveRecord::Base
     user
   end
 
+  def zendesk_subdomain
+    "cronofy"
+  end
+
   def active?
     all_credentials? and cronofy_calendar_id.present?
   end
@@ -33,8 +37,8 @@ class User < ActiveRecord::Base
     cronofy_credentials? and zendesk_credentials?
   end
 
-  def first_note_sync?
-    self.zendesk_high_usn == 0
+  def first_zendesk_sync?
+    self.zendesk_last_modified.nil?
   end
 
   def cronofy_credentials?
@@ -51,7 +55,7 @@ class User < ActiveRecord::Base
     raise "calendar_id required" if calendar_id.blank?
 
     self.cronofy_calendar_id = calendar_id
-    self.zendesk_high_usn = 0
+    self.zendesk_last_modified = nil
   end
 
   def cronofy_access_token_expired?(time)

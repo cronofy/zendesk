@@ -1,4 +1,4 @@
-class ReminderSynchronizer
+class TaskSynchronizer
   include Hatchet
 
   REMINDER_DURATION_SECONDS = 30 * 60
@@ -56,8 +56,8 @@ class ReminderSynchronizer
       log.info { "Callbacks not enabled - user=#{user.id}" }
     end
 
-    SyncRemindersFromEvernote.perform_later(user.id)
-    SyncRemindersFromCronofy.perform_later(user.id)
+    # SyncRemindersFromZendesk.perform_later(user.id)
+    # SyncRemindersFromCronofy.perform_later(user.id)
 
     log.info { "Exiting #setup_sync - user=#{user.id}" }
   end
@@ -74,25 +74,27 @@ class ReminderSynchronizer
     calendars
   end
 
-  def sync_changed_notes
-    log.info { "Entering #sync_changed_notes - user=#{user.id}" }
+  def sync_changed_tasks
+    log.info { "Entering #sync_changed_tasks - user=#{user.id}" }
 
-    skip_deletes = user.first_note_sync?
+    skip_deletes = user.first_zendesk_sync?
 
-    log.info { "#sync_changed_notes - user=#{user.id} - skip_deletes=#{skip_deletes}" }
+    sync_start = current_time
 
-    notes, highest_usn = evernote_request { changed_notes }
+    log.info { "#sync_changed_tasks - user=#{user.id} - skip_deletes=#{skip_deletes}" }
 
-    notes.each do |note|
+    tasks = changed_tasks(user.zendesk_last_modified)
+
+    tasks.each do |task|
       cronofy_request do
-        update_event(note, skip_deletes: skip_deletes)
+        update_event(task, skip_deletes: skip_deletes)
       end
     end
 
-    user.evernote_high_usn = highest_usn
+    user.zendesk_last_modified = sync_start
     user.save
 
-    log.info { "Exiting #sync_changed_notes - user=#{user.id}" }
+    log.info { "Exiting #sync_changed_tasks - user=#{user.id}" }
   end
 
   def sync_changed_events
@@ -103,7 +105,7 @@ class ReminderSynchronizer
     events = changed_events
 
     events.each do |event|
-      evernote_request { update_evernote_reminder_from_event(event) }
+      evernote_request { update_zendesk_task_from_event(event) }
     end
 
     user.cronofy_last_modified = sync_start
@@ -112,7 +114,7 @@ class ReminderSynchronizer
     log.info { "Exiting #sync_changed_events - user=#{user.id}" }
   end
 
-  private
+  # private
 
   def create_cronofy_notification_channel(callback_url)
     cronofy_request do
@@ -134,36 +136,19 @@ class ReminderSynchronizer
     cronofy_request { cronofy_client.read_events(args).to_a }
   end
 
-  def changed_notes
-    note_filter = Evernote::EDAM::NoteStore::NoteFilter.new
+  def changed_tasks(last_modified=nil)
+    tasks = []
+    query = "type:ticket"
+    query += " updated_at>=#{last_modified.strftime('%FT%T%:z')}" if last_modified
 
-    filter = Evernote::EDAM::NoteStore::SyncChunkFilter.new
-    filter.includeNotes = true
-    filter.includeNoteAttributes = true
-    filter.includeExpunged = true
+    log.debug { "#changed_tasks query=#{query}" }
 
-    notes = []
-
-    highest_seen_usn = user.evernote_high_usn
-    highest_usn = -1
-    max_entries = 100
-
-    until highest_seen_usn == highest_usn
-      sync_chunk = evernote_note_store.getFilteredSyncChunk(user.evernote_access_token, highest_seen_usn, max_entries, filter)
-
-      notes.concat(sync_chunk.notes) if sync_chunk.notes
-
-      if sync_chunk.expungedNotes
-        # Need to map expunged guid into something that acts like a note
-        expunged_notes = sync_chunk.expungedNotes.map { |guid| ExpungedNote.new(guid) }
-        notes.concat(expunged_notes)
+    zendesk_client
+      .search(query: query)
+      .all do |ticket|
+        tasks << ticket if ticket.type == 'task'
       end
-
-      highest_seen_usn = sync_chunk.chunkHighUSN
-      highest_usn = sync_chunk.updateCount
-    end
-
-    [notes, highest_usn]
+    tasks
   end
 
   def update_evernote_reminder_from_event(event)
@@ -198,56 +183,53 @@ class ReminderSynchronizer
     end
   end
 
-  def update_event(note, opts = {})
-    event = note_as_event(note)
+  def update_event(task, opts = {})
+    event = task_as_event(task)
 
     if event[:event_deleted]
       if opts.fetch(:skip_deletes, false)
-        log.info { "Skipping deletion of #{event[:event_id]}" }
+        log.info { "#update_event Skipping deletion of #{event[:event_id]}" }
       else
-        log.info { "Deleting #{event[:event_id]}" }
+        log.info { "#update_event Deleting #{event[:event_id]}" }
         cronofy_client.delete_event(user.cronofy_calendar_id, event[:event_id])
       end
     else
-      log.info { "Upserting #{event[:event_id]}" }
+      log.info { "#update_event Upserting #{event[:event_id]}, #{event[:attributes]}" }
       cronofy_client.upsert_event(user.cronofy_calendar_id, event[:attributes])
     end
   end
 
-  def event_as_note(event)
+  def event_as_task(event)
     {
-      guid: event.event_id,
-      title: event.summary,
+      id: event.event_id,
+      summary: event.summary,
       has_reminder: !event.deleted,
-      reminder_time: event.start.to_time.getutc,
+      due_at: event.start.to_time.getutc,
     }
   end
 
-  def note_as_event(note)
-    event_deleted = (!!note.deleted or note.attributes.reminderTime.nil?)
+  def task_as_event(task)
+    event_deleted = task.due_at.nil?
 
     hash = {
-      event_id: note.guid,
+      event_id: task.id,
       event_deleted: event_deleted,
-      note_attributes: note.attributes.inspect,
     }
 
     unless event_deleted
-      note_url = evernote_client.endpoint("shard/#{evernote_user.shardId}/nl/#{evernote_user.id}/#{note.guid}/?utm_source=cronofy&utm_medium=calendar&utm_campaign=calendar_connector")
+      task_url = shorten_url("https://#{user.zendesk_subdomain}.zendesk.com/requests/#{task.id}")
 
       hash[:attributes] = {
-        event_id: note.guid,
-        summary: note.title,
-        description: shorten_url(note_url),
+        event_id: task.id,
+        summary: task.subject,
+        description: "#{task_url}\n\n#{task.description}",
       }
 
-      if reminder_time = note.attributes.reminderTime
+      if reminder_time = task.due_at
         log.debug { "reminder_time=#{reminder_time} (#{reminder_time.class})" }
-        start_time = Time.at(reminder_time / 1000.0)
-        log.debug { "start_time=#{start_time} (#{start_time.class})" }
 
-        hash[:attributes][:start] = start_time
-        hash[:attributes][:end] = start_time + REMINDER_DURATION_SECONDS
+        hash[:attributes][:start] = reminder_time
+        hash[:attributes][:end] = reminder_time + REMINDER_DURATION_SECONDS
       end
     end
 
@@ -276,24 +258,6 @@ class ReminderSynchronizer
     raise
   end
 
-  # Wrapper for Evernote API requests to handle refreshing the access token
-  def evernote_request(&block)
-    block.call
-  rescue Evernote::EDAM::Error::EDAMUserException => e
-    error_desc = Evernote::EDAM::Error::EDAMErrorCode::VALUE_MAP.fetch(e.errorCode, "Unknown")
-
-    if e.errorCode == Evernote::EDAM::Error::EDAMErrorCode::AUTH_EXPIRED
-      log.warn "#evernote_request failed - user=#{user.id} - #{e.class} - errorCode=#{e.errorCode}, errorDesc=#{error_desc}", e
-      raise EvernoteCredentialsInvalid.new(user.id)
-    end
-
-    log.error "#evernote_request failed - user=#{user.id} - #{e.class} - errorCode=#{e.errorCode}, errorDesc=#{error_desc}", e
-    raise
-  rescue => e
-    log.error "#evernote_request failed - user=#{user.id} - #{e.class} - #{e.message}", e
-    raise
-  end
-
   def refresh_cronofy_access_token
     credentials = cronofy_client.refresh_access_token
 
@@ -311,22 +275,6 @@ class ReminderSynchronizer
     Time.now.getutc
   end
 
-  def evernote_client
-    @evernote_client ||= EvernoteOAuth::Client.new(token: user.evernote_access_token, service_host: ENV['EVERNOTE_SERVICE_HOST'] || 'sandbox.evernote.com')
-  end
-
-  def evernote_note_store
-    @evernote_note_store ||= evernote_client.note_store
-  end
-
-  def evernote_user_store
-    @evernote_user_store ||= evernote_client.user_store
-  end
-
-  def evernote_user
-    @evernote_user ||= evernote_user_store.getUser(user.evernote_access_token)
-  end
-
   def cronofy_client
     @cronofy_client ||= Cronofy::Client.new(
       access_token: user.cronofy_access_token,
@@ -334,9 +282,16 @@ class ReminderSynchronizer
     )
   end
 
+  def zendesk_client
+    @zendesk_client ||= ZendeskAPI::Client.new do |config|
+      config.url = "https://#{user.zendesk_subdomain}.zendesk.com/api/v2"
+      config.access_token = user.zendesk_access_token
+    end
+  end
+
   def shorten_url(url)
     if Shortinator.configured?
-      Shortinator.shorten(url, 'evernote')
+      Shortinator.shorten(url, 'zendesk')
     else
       url
     end
