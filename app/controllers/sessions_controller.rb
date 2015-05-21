@@ -67,7 +67,7 @@ class SessionsController < ApplicationController
   def setup_sync(user)
     return unless user.active?
 
-    synchronizer = ReminderSynchronizer.new(user)
+    synchronizer = TaskSynchronizer.new(user)
     callback_url = cronofy_callback_url(id: user.cronofy_id)
 
     synchronizer.setup_sync(callback_url)

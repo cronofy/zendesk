@@ -86,9 +86,21 @@ class RootController < ApplicationController
     redirect_to :root
   end
 
+  def setup_zendesk
+    if params[:subdomain].blank?
+      flash[:alert] = "We need your Zendesk subdomain"
+      redirect_to :root
+    end
+
+    current_user.zendesk_subdomain = params[:subdomain]
+    current_user.save
+    session['zendesk_subdomain'] = current_user.zendesk_subdomain
+    redirect_to "/auth/zendesk"
+  end
+
   def grouped_calendars
     @grouped_calendars ||= begin
-      reminder_synchronizer.writable_calendars
+      task_synchronizer.writable_calendars
         .map { |c| [ c.calendar_name, "#{c.profile_name} [#{c.provider_name.titlecase}]", c.calendar_id ] }
         .sort_by { |c| [c[1], c[0].downcase] }
         .group_by { |c| c[1] }
@@ -99,10 +111,10 @@ class RootController < ApplicationController
 
   def setup_sync
     callback_url = cronofy_callback_url(id: current_user.cronofy_id)
-    reminder_synchronizer.setup_sync(callback_url)
+    task_synchronizer.setup_sync(callback_url)
   end
 
-  def reminder_synchronizer
-    @reminder_synchronizer ||= ReminderSynchronizer.new(current_user)
+  def task_synchronizer
+    @task_synchronizer ||= TaskSynchronizer.new(current_user)
   end
 end

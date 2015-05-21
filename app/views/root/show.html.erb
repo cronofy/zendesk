@@ -99,7 +99,15 @@ _kmq.push(['trackSubmit', 'sync_settings', 'sync_settings']);
                   </div>
                   <div id="collapseTwo" class="panel-collapse collapse in" role="tabpanel">
                       <div class="panel-body">
-                          <p><a id="connect_zendesk" class="btn btn-success" href="/auth/zendesk">Create connection</a></p>
+                          <%= form_tag setup_zendesk_path, id: 'zendesk_settings' do %>
+
+                            <div class="form-group">
+                              <label for="calendar_id">Zendesk subdomain</label>
+                              https://<%= text_field_tag "subdomain", current_user.zendesk_subdomain, class: 'text-right' %>.zendesk.com
+                            </div>
+
+                            <%= submit_tag 'Create connection', class: 'btn btn-success', data: { disable_with: "Connecting..." } %>
+                          <% end %>
                           <p class="text-muted">You will be taken to authorise this app with Zendesk.</p>
                       </div>
                   </div>

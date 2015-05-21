@@ -4,6 +4,8 @@ Rails.application.routes.draw do
   post 'calendar', to: 'root#calendar'
   post 'reset', to: 'root#reset'
   post 'sync', to: 'root#sync'
+  post 'setup_zendesk', to: 'root#setup_zendesk'
+
   delete '/', to: 'root#destroy'
 
   post '/webhooks/cronofy/:id', to: 'cronofy_webhooks#inbound', as: 'cronofy_callback'

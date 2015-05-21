@@ -3,10 +3,11 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     scope: "read_account list_calendars read_events create_event delete_event"
   }
 
-  zendesk_site = ENV['ZENDESK_SITE'] || "https://cronofy.zendesk.com"
   provider :zendesk, ENV['ZENDESK_CLIENT_ID'], ENV['ZENDESK_CLIENT_SECRET'], {
     scope: "read write",
-    client_options: { site: zendesk_site }
+    setup: lambda{|env|
+      env['omniauth.strategy'].options[:client_options].site = "https://#{env['rack.session']['zendesk_subdomain']}.zendesk.com"
+    },
   }
 end
 

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150521083654) do
+ActiveRecord::Schema.define(version: 20150521144934) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -45,6 +45,7 @@ ActiveRecord::Schema.define(version: 20150521083654) do
     t.datetime "cronofy_access_token_expiration"
     t.datetime "cronofy_last_modified"
     t.datetime "zendesk_last_modified"
+    t.text     "zendesk_subdomain"
   end
 
 end
