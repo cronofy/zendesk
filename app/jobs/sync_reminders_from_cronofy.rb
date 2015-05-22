@@ -10,7 +10,7 @@ class SyncRemindersFromCronofy < ActiveJob::Base
 
     if user
       if user.all_credentials?
-        synchronizer = ReminderSynchronizer.new(user)
+        synchronizer = TaskSynchronizer.new(user)
         synchronizer.sync_changed_events
       else
         log.warn { "Insufficient crendentials to perform sync for user=#{user_id}" }
@@ -20,11 +20,11 @@ class SyncRemindersFromCronofy < ActiveJob::Base
     end
 
     log.info { "Exiting #perform(user_id=#{user_id})" }
-  rescue ReminderSynchronizer::CronofyCredentialsInvalid => e
+  rescue TaskSynchronizer::CronofyCredentialsInvalid => e
     log.warn { "#{e.class} - #{e.message}" }
     User.remove_cronofy_credentials(e.user_id)
     RelinkMailer.relink_cronofy(e.user_id).deliver_later
-  rescue ReminderSynchronizer::ZendeskCredentialsInvalid => e
+  rescue TaskSynchronizer::ZendeskCredentialsInvalid => e
     log.warn { "#{e.class} - #{e.message}" }
     User.remove_zendesk_credentials(e.user_id)
     RelinkMailer.relink_zendesk(e.user_id).deliver_later

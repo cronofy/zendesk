@@ -1,4 +1,4 @@
-class SyncRemindersFromZendesk < ActiveJob::Base
+class SyncUserTasksFromZendesk < ActiveJob::Base
   include Hatchet
 
   queue_as :default
@@ -10,24 +10,24 @@ class SyncRemindersFromZendesk < ActiveJob::Base
 
     if user
       if user.all_credentials?
-        synchronizer = ReminderSynchronizer.new(user)
-        synchronizer.sync_changed_notes
+        synchronizer = TaskSynchronizer.new(user)
+        synchronizer.sync_changed_tasks
       else
-        log.warn { "Insufficient crendentials to perform sync for user=#{user_id}" }
+        log.warn { "Insufficient credentials to perform sync for user=#{user_id}" }
       end
     else
       log.warn { "No record found for user=#{user_id}" }
     end
 
     log.info { "Exiting #perform(user_id=#{user_id})" }
-  rescue ReminderSynchronizer::CronofyCredentialsInvalid => e
+  rescue TaskSynchronizer::CronofyCredentialsInvalid => e
     log.warn { "#{e.class} - #{e.message}" }
     User.remove_cronofy_credentials(e.user_id)
     RelinkMailer.relink_cronofy(e.user_id).deliver_later
-  rescue ReminderSynchronizer::EvernoteCredentialsInvalid => e
+  rescue TaskSynchronizer::ZendeskCredentialsInvalid => e
     log.warn { "#{e.class} - #{e.message}" }
-    User.remove_evernote_credentials(e.user_id)
-    RelinkMailer.relink_evernote(e.user_id).deliver_later
+    User.remove_zendesk_credentials(e.user_id)
+    RelinkMailer.relink_zendesk(e.user_id).deliver_later
   rescue => e
     log.error "Error within #perform(user_id=#{user_id}) - #{e.message}", e
     raise

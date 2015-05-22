@@ -9,7 +9,7 @@ Rails.application.routes.draw do
   delete '/', to: 'root#destroy'
 
   post '/webhooks/cronofy/:id', to: 'cronofy_webhooks#inbound', as: 'cronofy_callback'
-  get '/webhooks/zendesk', to: 'zendesk_webhooks#inbound', as: 'zendesk_callback'
+  post '/webhooks/zendesk/:group_id', to: 'zendesk_webhooks#inbound', as: 'zendesk_callback'
 
   get "/auth/:provider/callback", to: "sessions#create"
   get "/auth/failure", to: "sessions#failure"

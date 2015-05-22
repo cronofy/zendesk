@@ -50,13 +50,10 @@ class TaskSynchronizer
   def setup_sync(callback_url)
     log.info { "Entering #setup_sync - user=#{user.id}" }
 
-    if ENV["CALLBACKS_ENABLED"].to_i > 0
-      create_cronofy_notification_channel(callback_url)
-    else
-      log.info { "Callbacks not enabled - user=#{user.id}" }
-    end
+    create_zendesk_notification_channel
+    create_cronofy_notification_channel(callback_url)
 
-    # SyncRemindersFromZendesk.perform_later(user.id)
+    SyncUserTasksFromZendesk.perform_later(user.id)
     # SyncRemindersFromCronofy.perform_later(user.id)
 
     log.info { "Exiting #setup_sync - user=#{user.id}" }
@@ -89,11 +86,11 @@ class TaskSynchronizer
 
     log.info { "#sync_changed_tasks - user=#{user.id} - skip_deletes=#{skip_deletes}" }
 
-    tasks = changed_tasks(user.zendesk_last_modified)
+    tickets = changed_tickets(user.zendesk_last_modified)
 
-    tasks.each do |task|
+    tickets.each do |ticket|
       cronofy_request do
-        update_event(task, skip_deletes: skip_deletes)
+        update_event(ticket, skip_deletes: skip_deletes)
       end
     end
 
@@ -122,6 +119,86 @@ class TaskSynchronizer
 
   # private
 
+  def create_zendesk_notification_channel
+
+    target_id = upsert_zendesk_target
+    upsert_zendesk_trigger(target_id)
+
+  end
+
+  def upsert_zendesk_target
+
+    target_url = "https://zendesk.cronofy.com/webhooks/zendesk/#{user.zendesk_subdomain}"
+    target_id = nil
+
+    zendesk_client.targets.all do |target|
+      target_id = target.id if target.target_url == target_url
+    end
+
+    unless target_id
+      target = zendesk_client.targets.create(
+        type: "url_target",
+        title: "Calendar Connector Target",
+        target_url: target_url,
+        attribute: "message",
+        method: "post"
+      )
+
+      log.debug { "#upsert_zendesk_target target=#{target.inspect}" }
+      target_id = target.id
+    end
+
+    target_id
+  end
+
+  def upsert_zendesk_trigger(target_id)
+
+    active_trigger = nil
+
+    zendesk_client.triggers.all do |trigger|
+      break if active_trigger = trigger.actions
+                                  .select { |action| action.field == 'notification_target' }
+                                  .find { |action| action.value[0] == target_id }
+    end
+
+    unless active_trigger
+
+      attributes = {
+        title: "Calendar",
+        actions: [
+          {
+            field: "notification_target",
+            value: [
+                "20132882",
+                "Ticket {{ticket.id}}"
+            ]
+          }
+        ],
+        conditions: {
+          all: [
+            {
+              field: "update_type",
+              operator: "is",
+              value: "Create"
+            },
+            {
+              field: "update_type",
+              operator: "is",
+              value: "Change"
+            }
+          ],
+          any: []
+        },
+      }
+
+      log.debug { JSON.generate(attributes) }
+
+      active_trigger = zendesk_client.triggers.create(attributes)
+    end
+
+    active_trigger
+  end
+
   def create_cronofy_notification_channel(callback_url)
     cronofy_request do
       cronofy_client.create_channel(callback_url)
@@ -142,17 +219,17 @@ class TaskSynchronizer
     cronofy_request { cronofy_client.read_events(args).to_a }
   end
 
-  def changed_tasks(last_modified=nil)
+  def changed_tickets(last_modified=nil)
     tasks = []
     query = "type:ticket"
     query += " updated_at>=#{last_modified.strftime('%FT%T%:z')}" if last_modified
 
-    log.debug { "#changed_tasks query=#{query}" }
+    log.debug { "#changed_tickets query=#{query}" }
 
     zendesk_client
       .search(query: query)
       .all do |ticket|
-        tasks << ticket if ticket.type == 'task'
+        tasks << ticket
       end
     tasks
   end
@@ -215,7 +292,13 @@ class TaskSynchronizer
   end
 
   def task_as_event(task)
-    event_deleted = task.due_at.nil?
+    # Filtering tasks as a delete here because they can change
+    # from a ticket to another category and deletes are no-ops if
+    # nothing to be done
+    #
+    event_deleted = task.type != 'task' ||
+                    task.due_at.nil? ||
+                    user.zendesk_user_id != task.assignee_id
 
     hash = {
       event_id: task.id,

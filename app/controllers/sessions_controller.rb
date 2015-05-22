@@ -57,7 +57,7 @@ class SessionsController < ApplicationController
 
   def process_zendesk_login(auth_hash)
     log.debug { "auth_hash=#{auth_hash.inspect}" }
-    current_user.zendesk_user_id = auth_hash['uid']
+    current_user.zendesk_user_id = auth_hash['info']['id']
     current_user.zendesk_access_token = auth_hash['credentials']['token']
     current_user.save
 
