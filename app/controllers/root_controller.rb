@@ -109,6 +109,12 @@ class RootController < ApplicationController
 
   helper_method :grouped_calendars
 
+  def selected_calendar_info
+    @selected_calendar_info ||= task_synchronizer.calendar_info(current_user.cronofy_calendar_id)
+  end
+
+  helper_method :selected_calendar_info
+
   def setup_sync
     callback_url = cronofy_callback_url(id: current_user.cronofy_id)
     task_synchronizer.setup_sync(callback_url)

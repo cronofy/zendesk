@@ -74,6 +74,12 @@ class TaskSynchronizer
     calendars
   end
 
+  def calendar_info(calendar_id)
+    cronofy_request do
+      cronofy_client.list_calendars.find { |calendar| calendar.calendar_id == calendar_id }
+    end
+  end
+
   def sync_changed_tasks
     log.info { "Entering #sync_changed_tasks - user=#{user.id}" }
 

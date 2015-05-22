@@ -194,6 +194,14 @@ _kmq.push(['trackSubmit', 'sync_settings', 'sync_settings']);
                 </div>
                 <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel">
                     <div class="panel-body app-copy">
+                        <p>
+                          Connected to
+                        </p>
+                        <ul>
+                          <li>Calendar: <strong><%= selected_calendar_info.calendar_name %></strong> <%= "(#{selected_calendar_info.provider_name.titlecase} - #{selected_calendar_info.profile_name})" %></li>
+                          <li>Zendesk: <strong><%= current_user.zendesk_subdomain %>.zendesk.com</strong></li>
+                        </ul>
+
                         <p>It may take a few minutes for your tasks to appear in your calendar. Once they are in your calendar, you can:</p>
                         <ul>
                             <li>alter the name of your note by changing the name of the event</li>
