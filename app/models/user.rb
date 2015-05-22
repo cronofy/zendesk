@@ -19,6 +19,7 @@ class User < ActiveRecord::Base
     user = User.find(id)
 
     user.zendesk_access_token = nil
+    user.zendesk_subdomain = nil
     user.save
 
     log.info { "Exiting .remove_zendesk_credentials(id=#{id})" }
