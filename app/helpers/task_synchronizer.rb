@@ -162,8 +162,7 @@ class TaskSynchronizer
     end
 
     unless active_trigger
-
-      attributes = {
+      trigger_attributes = {
         title: "Calendar",
         actions: [
           {
@@ -191,9 +190,7 @@ class TaskSynchronizer
         },
       }
 
-      log.debug { JSON.generate(attributes) }
-
-      active_trigger = zendesk_client.triggers.create(attributes)
+      active_trigger = zendesk_client.triggers.create(trigger_attributes)
     end
 
     active_trigger
@@ -220,7 +217,7 @@ class TaskSynchronizer
   end
 
   def changed_tickets(last_modified=nil)
-    tasks = []
+    tickets = []
     query = "type:ticket"
     query += " updated_at>=#{last_modified.strftime('%FT%T%:z')}" if last_modified
 
@@ -229,9 +226,9 @@ class TaskSynchronizer
     zendesk_client
       .search(query: query)
       .all do |ticket|
-        tasks << ticket
+        tickets << ticket
       end
-    tasks
+    tickets
   end
 
   def update_evernote_reminder_from_event(event)
@@ -298,7 +295,7 @@ class TaskSynchronizer
     #
     event_deleted = task.type != 'task' ||
                     task.due_at.nil? ||
-                    user.zendesk_user_id != task.assignee_id
+                    task.assignee_id != user.zendesk_user_id.to_i
 
     hash = {
       event_id: task.id,
