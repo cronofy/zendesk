@@ -175,7 +175,8 @@ class TaskSynchronizer
           }
         ],
         conditions: {
-          all: [
+          all: [],
+          any: [
             {
               field: "update_type",
               operator: "is",
@@ -186,8 +187,7 @@ class TaskSynchronizer
               operator: "is",
               value: "Change"
             }
-          ],
-          any: []
+          ]
         },
       }
 
