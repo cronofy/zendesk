@@ -169,7 +169,7 @@ class TaskSynchronizer
           {
             field: "notification_target",
             value: [
-                "20132882",
+                target_id,
                 "Ticket {{ticket.id}}"
             ]
           }
