@@ -3,13 +3,12 @@ class ZendeskWebhooksController < ApplicationController
 
   def inbound
     log.info { "#inbound - params=#{params.inspect}" }
-    user = User.find_by(zendesk_user_id: params[:userId])
 
-    if user
-      SyncRemindersFromZendesk.perform_later(user.id)
-      render nothing: true, status: :ok
-    else
-      render nothing: true, status: :not_found
+    User.where(zendesk_subdomain: params[:group_id]).find_each do |user|
+      SyncUserTasksFromZendesk.perform_later(user.id)
+      log.info { "#inbound queued SyncUserTasksFromZendesk for user_id=#{user.id}" }
     end
+
+    render nothing: true, status: :ok
   end
 end
