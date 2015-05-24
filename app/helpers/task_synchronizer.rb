@@ -88,6 +88,8 @@ class TaskSynchronizer
 
     tickets = changed_tickets(user.zendesk_last_modified)
 
+    log.info { "#sync_changed_tasks - tickets.count=#{tickets.count}" }
+
     tickets.each do |ticket|
       cronofy_request do
         update_event(ticket, skip_deletes: skip_deletes)
@@ -221,7 +223,7 @@ class TaskSynchronizer
     query = "type:ticket"
     query += " updated_at>=#{last_modified.strftime('%FT%T%:z')}" if last_modified
 
-    log.debug { "#changed_tickets query=#{query}" }
+    log.info { "#changed_tickets query=#{query}" }
 
     zendesk_client
       .search(query: query)
