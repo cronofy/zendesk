@@ -1,4 +1,4 @@
-class SyncRemindersFromCronofy < ActiveJob::Base
+class SyncTasksFromCronofy < ActiveJob::Base
   include Hatchet
 
   queue_as :default

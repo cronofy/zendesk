@@ -1,7 +1,7 @@
 class TaskSynchronizer
   include Hatchet
 
-  REMINDER_DURATION_SECONDS = 30 * 60
+  REMINDER_DURATION_SECONDS = 10 * 60
 
   class CronofyCredentialsInvalid < StandardError
     attr_reader :user_id
@@ -21,26 +21,6 @@ class TaskSynchronizer
     end
   end
 
-  class StubAttributes
-    def reminderTime
-      nil
-    end
-  end
-
-  ExpungedNote = Struct.new(:guid) do
-    def title
-      ""
-    end
-
-    def deleted
-      true
-    end
-
-    def attributes
-      @attributes ||= StubAttributes.new
-    end
-  end
-
   attr_reader :user
 
   def initialize(user)
@@ -54,7 +34,7 @@ class TaskSynchronizer
     create_cronofy_notification_channel(callback_url)
 
     SyncUserTasksFromZendesk.perform_later(user.id)
-    # SyncRemindersFromCronofy.perform_later(user.id)
+    SyncTasksFromCronofy.perform_later(user.id)
 
     log.info { "Exiting #setup_sync - user=#{user.id}" }
   end
@@ -104,8 +84,10 @@ class TaskSynchronizer
 
     events = changed_events
 
+    log.info { "#sync_changed_events - events.count=#{events.count}" }
+
     events.each do |event|
-      evernote_request { update_zendesk_task_from_event(event) }
+      update_zendesk_task_from_event(event)
     end
 
     user.cronofy_last_modified = sync_start
@@ -117,10 +99,8 @@ class TaskSynchronizer
   # private
 
   def create_zendesk_notification_channel
-
     target_id = upsert_zendesk_target
     upsert_zendesk_trigger(target_id)
-
   end
 
   def upsert_zendesk_target
@@ -225,39 +205,27 @@ class TaskSynchronizer
       .all do |ticket|
         tickets << ticket
       end
+
+    log.info { "#changed_tickets tickets.count=#{tickets.count}" }
     tickets
   end
 
-  def update_evernote_reminder_from_event(event)
-    cr_note = event_as_note(event)
+  def update_zendesk_task_from_event(event)
+    cronofy_task = event_as_task(event)
 
-    en_note = evernote_note_store.getNote(user.evernote_access_token, cr_note[:guid], false, false, false, false)
-    en_note_changed = false
+    ticket = zendesk_client.tickets.find(id: event[:id])
 
-    if en_note.title != cr_note[:title]
-      en_note.title = cr_note[:title]
-      en_note_changed = true
-    end
+    ticket.title = cronofy_task[:title]
 
-    if cr_note[:has_reminder]
-      reminder_time = cr_note[:reminder_time].to_i * 1000
-
-      if en_note.attributes.reminderTime != reminder_time
-        en_note.attributes.reminderTime = reminder_time
-        en_note_changed = true
-      end
+    if cronofy_task[:deleted]
+      ticket.type = 'problem'
+      ticket.due_at = nil
     else
-      if en_note.attributes.reminderTime
-        en_note.attributes.reminderTime = nil
-        en_note.attributes.reminderOrder = nil
-        en_note.attributes.reminderDoneTime = nil
-        en_note_changed = true
-      end
+      ticket.type = 'task'
+      ticket.due_at = cronofy_task[:due_at]
     end
 
-    if en_note_changed
-      evernote_note_store.updateNote(user.evernote_access_token, en_note)
-    end
+    ticket.save
   end
 
   def update_event(task, opts = {})
@@ -280,7 +248,7 @@ class TaskSynchronizer
     {
       id: event.event_id,
       summary: event.summary,
-      has_reminder: !event.deleted,
+      deleted: event.deleted,
       due_at: event.start.to_time.getutc,
     }
   end
