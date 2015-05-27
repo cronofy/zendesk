@@ -61,7 +61,9 @@ class TaskSynchronizer
     log.info { "#sync_changed_tasks - user=#{user.id} - skip_deletes=#{skip_deletes}" }
 
     # subtract 60 secs to account for system clock differences between domains
-    tickets = changed_tickets(user.zendesk_last_modified - 60)
+    last_modified = user.zendesk_last_modified ? user.zendesk_last_modified - 60 : nil
+
+    tickets = changed_tickets(last_modified)
 
     log.info { "#sync_changed_tasks - tickets.count=#{tickets.count}" }
 
@@ -96,7 +98,7 @@ class TaskSynchronizer
     log.info { "Exiting #sync_changed_events - user=#{user.id}" }
   end
 
-  # private
+  private
 
   def create_zendesk_notification_channel
     target_id = upsert_zendesk_target
@@ -213,7 +215,7 @@ class TaskSynchronizer
   def update_zendesk_task_from_event(event)
     cronofy_task = event_as_task(event)
 
-    ticket = zendesk_client.tickets.find(id: event[:id])
+    ticket = zendesk_client.tickets.find(id: event[:event_id])
 
     ticket.title = cronofy_task[:title]
 
