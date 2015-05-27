@@ -252,11 +252,13 @@ class TaskSynchronizer
   end
 
   def event_as_task(event)
+    # note due_at has to be specified as ISO 8601 string even though Zendesk client
+    # returns as Time :)
     {
       id: event.event_id,
       subject: event.summary,
       deleted: event.deleted,
-      due_at: event.start.to_time.getutc,
+      due_at: event.start.to_time.getutc.strftime('%FT%T%:z'),
     }
   end
 
