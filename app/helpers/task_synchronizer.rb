@@ -60,15 +60,9 @@ class TaskSynchronizer
   end
 
   def writable_calendars
-    log.info { "Entering #writable_calendars - user=#{user.id}" }
-
-    calendars = cronofy_request do
+    cronofy_request do
       cronofy_client.list_calendars.reject(&:calendar_readonly)
     end
-
-    log.info { "Exiting #writable_calendars - result=#{calendars.count} calendars -  user=#{user.id}" }
-
-    calendars
   end
 
   def calendar_info(calendar_id)
@@ -86,7 +80,8 @@ class TaskSynchronizer
 
     log.info { "#sync_changed_tasks - user=#{user.id} - skip_deletes=#{skip_deletes}" }
 
-    tickets = changed_tickets(user.zendesk_last_modified)
+    # subtract 60 secs to account for system clock differences between domains
+    tickets = changed_tickets(user.zendesk_last_modified - 60)
 
     log.info { "#sync_changed_tasks - tickets.count=#{tickets.count}" }
 
