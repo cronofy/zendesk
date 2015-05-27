@@ -98,7 +98,7 @@ class TaskSynchronizer
     log.info { "Exiting #sync_changed_events - user=#{user.id}" }
   end
 
-  private
+  # private
 
   def create_zendesk_notification_channel
     target_id = upsert_zendesk_target
@@ -213,11 +213,12 @@ class TaskSynchronizer
   end
 
   def update_zendesk_task_from_event(event)
+    log.info { "#update_zendesk_task_from_event event_id=#{event[:event_id]}" }
     cronofy_task = event_as_task(event)
 
-    ticket = zendesk_client.tickets.find(id: event[:event_id])
+    ticket = zendesk_client.tickets.find(id: cronofy_task[:id])
 
-    ticket.title = cronofy_task[:title]
+    ticket.subject = cronofy_task[:subject]
 
     if cronofy_task[:deleted]
       ticket.type = 'problem'
@@ -227,7 +228,11 @@ class TaskSynchronizer
       ticket.due_at = cronofy_task[:due_at]
     end
 
-    ticket.save
+    ticket.save!
+  rescue ZendeskAPI::Error::NetworkError => e
+    log.error "#update_zendesk_task_from_event event_id=#{event[:event_id]} failed with #{e.message} body=#{e.response.body}", e
+  rescue => e
+    log.error "#update_zendesk_task_from_event event_id=#{event[:event_id]} failed with #{e.message}", e
   end
 
   def update_event(task, opts = {})
@@ -249,7 +254,7 @@ class TaskSynchronizer
   def event_as_task(event)
     {
       id: event.event_id,
-      summary: event.summary,
+      subject: event.summary,
       deleted: event.deleted,
       due_at: event.start.to_time.getutc,
     }
