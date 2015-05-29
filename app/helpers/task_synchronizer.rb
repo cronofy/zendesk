@@ -196,17 +196,14 @@ class TaskSynchronizer
   end
 
   def changed_tickets(last_modified=nil)
-    tickets = []
     query = "type:ticket"
     query += " updated_at>=#{last_modified.strftime('%FT%T%:z')}" if last_modified
 
     log.info { "#changed_tickets query=#{query}" }
 
-    zendesk_client
-      .search(query: query)
-      .all do |ticket|
-        tickets << ticket
-      end
+    tickets = zendesk_client
+                .search(query: query)
+                .to_a
 
     log.info { "#changed_tickets tickets.count=#{tickets.count}" }
     tickets
@@ -218,12 +215,7 @@ class TaskSynchronizer
 
     ticket = zendesk_client.tickets.find(id: cronofy_task[:id])
 
-    ticket.subject = cronofy_task[:subject]
-
-    if cronofy_task[:deleted]
-      ticket.type = 'problem'
-      ticket.due_at = nil
-    else
+    if !cronofy_task[:deleted]
       ticket.type = 'task'
       ticket.due_at = cronofy_task[:due_at]
     end
@@ -267,7 +259,8 @@ class TaskSynchronizer
     # from a ticket to another category and deletes are no-ops if
     # nothing to be done
     #
-    event_deleted = task.type != 'task' ||
+    event_deleted = task.status == 'solved' ||
+                    task.type != 'task' ||
                     task.due_at.nil? ||
                     task.assignee_id != user.zendesk_user_id.to_i
 
@@ -281,7 +274,7 @@ class TaskSynchronizer
 
       hash[:attributes] = {
         event_id: task.id,
-        summary: task.subject,
+        summary: "#{task.subject} [#{task.priority.capitalize}]" ,
         description: "#{task_url}\n\n#{task.description}",
       }
 
