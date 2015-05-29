@@ -24,7 +24,7 @@ class SyncUserTasksFromZendesk < ActiveJob::Base
     log.warn { "#{e.class} - #{e.message}" }
     User.remove_cronofy_credentials(e.user_id)
     RelinkMailer.relink_cronofy(e.user_id).deliver_later
-  rescue TaskSynchronizer::ZendeskCredentialsInvalid => e
+  rescue ZendeskApiClient::ZendeskCredentialsInvalid => e
     log.warn { "#{e.class} - #{e.message}" }
     User.remove_zendesk_credentials(e.user_id)
     RelinkMailer.relink_zendesk(e.user_id).deliver_later

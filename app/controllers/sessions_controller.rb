@@ -1,4 +1,6 @@
 class SessionsController < ApplicationController
+  include ZendeskApiClient
+
   force_ssl if: :ssl_configured?
 
   def create
@@ -59,6 +61,7 @@ class SessionsController < ApplicationController
     log.debug { "auth_hash=#{auth_hash.inspect}" }
     current_user.zendesk_user_id = auth_hash['info']['id']
     current_user.zendesk_access_token = auth_hash['credentials']['token']
+    current_user.zendesk_time_zone = get_zendesk_client(current_user).current_user.time_zone
     current_user.save
 
     setup_sync(current_user)
@@ -72,4 +75,5 @@ class SessionsController < ApplicationController
 
     synchronizer.setup_sync(callback_url)
   end
+
 end

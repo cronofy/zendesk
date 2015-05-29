@@ -1,6 +1,8 @@
 class TaskSynchronizer
   include Hatchet
+  include ZendeskApiClient
 
+  REMINDER_HOUR_OF_DAY = 8
   REMINDER_DURATION_SECONDS = 10 * 60
 
   class CronofyCredentialsInvalid < StandardError
@@ -8,15 +10,6 @@ class TaskSynchronizer
 
     def initialize(user_id)
       super("Cronofy credentials invalid for user=#{user_id}")
-      @user_id = user_id
-    end
-  end
-
-  class ZendeskCredentialsInvalid < StandardError
-    attr_reader :user_id
-
-    def initialize(user_id)
-      super("Zendesk credentials invalid for user=#{user_id}")
       @user_id = user_id
     end
   end
@@ -272,14 +265,20 @@ class TaskSynchronizer
     unless event_deleted
       task_url = shorten_url("https://#{user.zendesk_subdomain}.zendesk.com/requests/#{task.id}")
 
+      task_summary = task.subject
+      task_summary += " [#{task.priority.capitalize}]" if task.priority
+
       hash[:attributes] = {
         event_id: task.id,
-        summary: "#{task.subject} [#{task.priority.capitalize}]" ,
+        summary: task_summary,
         description: "#{task_url}\n\n#{task.description}",
       }
 
-      if reminder_time = task.due_at
-        log.debug { "reminder_time=#{reminder_time} (#{reminder_time.class})" }
+      if task.due_at
+        time_zone = Time.find_zone(user.zendesk_time_zone)
+        reminder_time = time_zone
+                          .local(task.due_at.year, task.due_at.month, task.due_at.day, REMINDER_HOUR_OF_DAY)
+                          .getutc
 
         hash[:attributes][:start] = reminder_time
         hash[:attributes][:end] = reminder_time + REMINDER_DURATION_SECONDS
@@ -336,10 +335,7 @@ class TaskSynchronizer
   end
 
   def zendesk_client
-    @zendesk_client ||= ZendeskAPI::Client.new do |config|
-      config.url = "https://#{user.zendesk_subdomain}.zendesk.com/api/v2"
-      config.access_token = user.zendesk_access_token
-    end
+    @zendesk_client ||= get_zendesk_client(user)
   end
 
   def shorten_url(url)
