@@ -1,5 +1,6 @@
 class RootController < ApplicationController
   force_ssl if: :ssl_configured?
+  after_action :allow_iframe
 
   helper_method :zendesk_credentials?,
                 :render_cronofy_auth?,
@@ -122,5 +123,11 @@ class RootController < ApplicationController
 
   def task_synchronizer
     @task_synchronizer ||= TaskSynchronizer.new(current_user)
+  end
+
+private
+
+  def allow_iframe
+    response.headers.except! 'X-Frame-Options'
   end
 end
