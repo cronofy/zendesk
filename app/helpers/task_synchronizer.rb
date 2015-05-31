@@ -241,7 +241,6 @@ class TaskSynchronizer
     # returns as Time :)
     {
       id: event.event_id,
-      subject: event.summary,
       deleted: event.deleted,
       due_at: event.start.to_time.getutc.strftime('%FT%T%:z'),
     }
