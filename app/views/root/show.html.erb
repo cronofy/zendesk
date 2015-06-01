@@ -201,7 +201,9 @@ _kmq.push(['trackSubmit', 'sync_settings', 'sync_settings']);
                           <li>Calendar: <strong><%= selected_calendar_info.calendar_name %></strong> <%= "(#{selected_calendar_info.provider_name.titlecase} - #{selected_calendar_info.profile_name})" %></li>
                           <li>Zendesk: <strong><%= current_user.zendesk_subdomain %>.zendesk.com</strong></li>
                         </ul>
-
+                        <p>
+                          <%= link_to "Return to Zendesk", "https://#{current_user.zendesk_subdomain}.zendesk.com", class: 'btn btn-success' %>
+                        </p>
                         <p>It may take a few minutes for your tasks to appear in your calendar. Once they are in your calendar, you can:</p>
                         <ul>
                             <li>change the Due Date for the Task just by moving the event</li>
