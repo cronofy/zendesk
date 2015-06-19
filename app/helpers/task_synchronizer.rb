@@ -45,50 +45,58 @@ class TaskSynchronizer
   end
 
   def sync_changed_tasks
-    log.info { "Entering #sync_changed_tasks - user=#{user.id}" }
+    log.ndc.scope("zendesk_subdomain=#{user.zendesk_subdomain}", "zendesk_user_id=#{user.id}") do
 
-    skip_deletes = user.first_zendesk_sync?
+      log.info { "Entering #sync_changed_tasks" }
 
-    sync_start = current_time
+      skip_deletes = user.first_zendesk_sync?
 
-    log.info { "#sync_changed_tasks - user=#{user.id} - skip_deletes=#{skip_deletes}" }
+      sync_start = current_time
 
-    # subtract 60 secs to account for system clock differences between domains
-    last_modified = user.zendesk_last_modified ? user.zendesk_last_modified - 60 : nil
+      log.info { "#sync_changed_tasks - skip_deletes=#{skip_deletes}" }
 
-    tickets = changed_tickets(last_modified)
+      # subtract 60 secs to account for system clock differences between domains
+      last_modified = user.zendesk_last_modified ? user.zendesk_last_modified - 60 : nil
 
-    log.info { "#sync_changed_tasks - tickets.count=#{tickets.count}" }
+      tickets = changed_tickets(last_modified)
 
-    tickets.each do |ticket|
-      cronofy_request do
-        update_event(ticket, skip_deletes: skip_deletes)
+      log.info { "#sync_changed_tasks - tickets.count=#{tickets.count}" }
+
+      tickets.each do |ticket|
+        cronofy_request do
+          update_event(ticket, skip_deletes: skip_deletes)
+        end
       end
+
+      user.zendesk_last_modified = sync_start
+      user.save
+
+      log.info { "Exiting #sync_changed_tasks" }
+
     end
-
-    user.zendesk_last_modified = sync_start
-    user.save
-
-    log.info { "Exiting #sync_changed_tasks - user=#{user.id}" }
   end
 
   def sync_changed_events
-    log.info { "Entering #sync_changed_events - user=#{user.id}" }
+    log.ndc.scope("zendesk_subdomain=#{user.zendesk_subdomain}", "zendesk_user_id=#{user.id}") do
 
-    sync_start = current_time
+      log.info { "Entering #sync_changed_events" }
 
-    events = changed_events
+      sync_start = current_time
 
-    log.info { "#sync_changed_events - events.count=#{events.count}" }
+      events = changed_events
 
-    events.each do |event|
-      update_zendesk_task_from_event(event)
+      log.info { "#sync_changed_events - events.count=#{events.count}" }
+
+      events.each do |event|
+        update_zendesk_task_from_event(event)
+      end
+
+      user.cronofy_last_modified = sync_start
+      user.save
+
+      log.info { "Exiting #sync_changed_events" }
+
     end
-
-    user.cronofy_last_modified = sync_start
-    user.save
-
-    log.info { "Exiting #sync_changed_events - user=#{user.id}" }
   end
 
   # private
