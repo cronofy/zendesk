@@ -5,7 +5,7 @@ class UnsubscribeUserFromMailChimp < ActiveJob::Base
 
   def perform(user_email)
 
-    log.info "#process started"
+    log.info "#perform started"
     unless mail_chimp_api_key
       log.warn { "No mail_chimp_api_key found" }
       return
@@ -19,6 +19,8 @@ class UnsubscribeUserFromMailChimp < ActiveJob::Base
     })
 
     log.info { "Unsubscribed #{user.email} from MailChimp list #{list_id}" }
+  rescue => e
+    log.error "#perform error=#{e.message} for user=#{user_email}", e
   end
 
   def list_id
