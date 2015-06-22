@@ -48,6 +48,7 @@ class RootController < ApplicationController
       flash[:info] = "Calendar ID set"
 
       setup_sync
+      SyncMailChimpSubscriberWithUser.perform_later(current_user.id)
     else
       flash[:alert] = "Must be connected to your calendar account before we do that"
     end
@@ -79,6 +80,8 @@ class RootController < ApplicationController
   end
 
   def destroy
+    UnsubscribeUserFromMailChimp.perform_later(current_user.email)
+
     current_user.destroy!
     logout
 
