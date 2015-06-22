@@ -19,6 +19,7 @@ gem 'omniauth-cronofy'
 gem 'omniauth-zendesk-oauth2'
 
 gem 'hatchet'
+gem 'gibbon'
 
 group :development, :test do
   gem 'rspec-rails'

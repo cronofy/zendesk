@@ -48,6 +48,7 @@ class SessionsController < ApplicationController
     user = User.find_or_create_by(cronofy_id: auth_hash['uid'])
 
     user.email = auth_hash['info']['email']
+    user.name = auth_hash['info']['name']
     user.cronofy_access_token = auth_hash['credentials']['token']
     user.cronofy_refresh_token = auth_hash['credentials']['refresh_token']
     user.cronofy_access_token_expiration = Time.at(auth_hash['credentials']['expires_at']).getutc
@@ -55,6 +56,7 @@ class SessionsController < ApplicationController
 
     login(user)
     setup_sync(user)
+    SyncMailChimpSubscriberWithUser.perform_later(user.id)
   end
 
   def process_zendesk_login(auth_hash)
@@ -65,6 +67,7 @@ class SessionsController < ApplicationController
     current_user.save
 
     setup_sync(current_user)
+    SyncMailChimpSubscriberWithUser.perform_later(user.id)
   end
 
   def setup_sync(user)

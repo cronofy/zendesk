@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150620184706) do
+ActiveRecord::Schema.define(version: 20150622110520) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -57,6 +57,7 @@ ActiveRecord::Schema.define(version: 20150620184706) do
     t.datetime "zendesk_last_modified"
     t.text     "zendesk_subdomain"
     t.string   "zendesk_time_zone"
+    t.string   "name"
   end
 
 end

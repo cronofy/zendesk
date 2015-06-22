@@ -1,6 +1,14 @@
 class User < ActiveRecord::Base
   include Hatchet
 
+  def first_name
+    name.split(" ", 2).first if name
+  end
+
+  def last_name
+    name.split(" ", 2)[1] if name && name.split(" ", 2).length == 2
+  end
+
   def self.remove_cronofy_credentials(id)
     log.info { "Entering .remove_cronofy_credentials(id=#{id})" }
     user = User.find(id)
