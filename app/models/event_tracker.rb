@@ -20,7 +20,12 @@ class EventTracker < ActiveRecord::Base
   end
 
   def self.track_operation(user_id, event_id, operation)
-    tracker = EventTracker.find_or_create_by(user_id: user_id, event_id: event_id)
+    tracker = begin
+                EventTracker.find_or_create_by(user_id: user_id, event_id: event_id)
+              rescue ActiveRecord::RecordNotUnique
+                # small chance in concurrent calls that this could generate a collision
+                EventTracker.find_by(user_id: user_id, event_id: event_id)
+              end
     tracker.operation = operation
     tracker.save
   end
