@@ -67,7 +67,7 @@ class SessionsController < ApplicationController
     current_user.save
 
     setup_sync(current_user)
-    SyncMailChimpSubscriberWithUser.perform_later(user.id)
+    SyncMailChimpSubscriberWithUser.perform_later(current_user.id)
   end
 
   def setup_sync(user)

@@ -18,7 +18,7 @@ class UnsubscribeUserFromMailChimp < ActiveJob::Base
       send_notify: true
     })
 
-    log.info { "Unsubscribed #{user.email} from MailChimp list #{list_id}" }
+    log.info { "Unsubscribed #{user_email} from MailChimp list #{list_id}" }
   rescue => e
     log.error "#perform error=#{e.message} for user=#{user_email}", e
   end
