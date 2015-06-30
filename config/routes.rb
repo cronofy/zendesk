@@ -18,4 +18,6 @@ Rails.application.routes.draw do
 
   match '*a', to: 'root#not_found', via: :all
   match '/',  to: 'root#not_found', via: :all
+  match '*a', to: 'root#not_found', via: :head
+  match '/',  to: 'root#not_found', via: :head
 end
