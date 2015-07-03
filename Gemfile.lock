@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/cronofy/shortinator.git
-  revision: 268e92d941993bfae0099a9eb4d47cd90e272f0f
+  revision: 52f6186e0a32c67d128ea297ad3633af02fe8d4e
   specs:
-    shortinator (0.0.1)
+    shortinator (0.1.0)
       base62 (= 1.0.0)
       bson_ext (~> 1.8)
       mongo (~> 1.8)
