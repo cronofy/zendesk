@@ -314,10 +314,10 @@ class TaskSynchronizer
       block.call
     end
   rescue Cronofy::AuthenticationFailureError => e
-    log.warn "#cronofy_request failed - user=#{user.id} - #{e.class} - #{e.message}", e
+    log.warn "#cronofy_request failed - user=#{user.id} - #{e.class} - #{e.message}"
     raise CronofyCredentialsInvalid.new(user.id)
   rescue => e
-    log.error "#cronofy_request failed - user=#{user.id} - #{e.class} - #{e.message}", e
+    log.error "#cronofy_request failed - user=#{user.id} - #{e.class} - #{e.message}"
     raise
   end
 
@@ -330,7 +330,7 @@ class TaskSynchronizer
 
     user.save
   rescue Cronofy::BadRequestError => e
-    log.warn "#refresh_cronofy_access_token failed - user=#{user.id} - #{e.class} - #{e.message}", e
+    log.warn "#refresh_cronofy_access_token failed - user=#{user.id} - #{e.class} - #{e.message}"
     raise CronofyCredentialsInvalid.new(user.id)
   end
 
