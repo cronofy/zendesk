@@ -14,6 +14,8 @@ Rails.application.routes.draw do
   get "/auth/:provider/callback", to: "sessions#create"
   get "/auth/failure", to: "sessions#failure"
 
+  get '/step3.html', to: 'root#redirect'
+
   resource :session
 
   match '*a', to: 'root#not_found', via: :all

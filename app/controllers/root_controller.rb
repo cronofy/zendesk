@@ -11,6 +11,10 @@ class RootController < ApplicationController
   def show
   end
 
+  def redirect
+    redirect_to root_path, status: 301
+  end
+
   def not_found
     log.warn { "#not_found - #{request.fullpath}" }
 
