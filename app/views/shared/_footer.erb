@@ -2,6 +2,15 @@
 
     <div class="app-container">
 
+       <ul class="share-buttons">
+          <li><a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%zendesk.cronofy.com&t=" title="Share on Facebook" target="_blank" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(document.URL) + '&t=' + encodeURIComponent(document.URL)); return false;"><img src="<%= image_path('flat_web_icon_set/color/Facebook.png') %>"></a></li>
+          <li><a href="https://twitter.com/intent/tweet?source=http%3A%2F%zendesk.cronofy.com&text=:%20http%3A%2F%zendesk.cronofy.com&via=cronofy" target="_blank" title="Tweet" onclick="window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(document.title) + ':%20'  + encodeURIComponent(document.URL)); return false;"><img src="<%= image_path('flat_web_icon_set/color/Twitter.png') %>"></a></li>
+          <li><a href="https://plus.google.com/share?url=http%3A%2F%zendesk.cronofy.com" target="_blank" title="Share on Google+" onclick="window.open('https://plus.google.com/share?url=' + encodeURIComponent(document.URL)); return false;"><img src="<%= image_path('flat_web_icon_set/color/Google-plus.png') %>"></a></li>
+          <li><a href="http://www.reddit.com/submit?url=http%3A%2F%zendesk.cronofy.com&title=" target="_blank" title="Submit to Reddit" onclick="window.open('http://www.reddit.com/submit?url=' + encodeURIComponent(document.URL) + '&title=' +  encodeURIComponent(document.title)); return false;"><img src="<%= image_path('flat_web_icon_set/color/Reddit.png') %>"></a></li>
+          <li><a href="http://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%zendesk.cronofy.com&title=&summary=&source=http%3A%2F%zendesk.cronofy.com" target="_blank" title="Share on LinkedIn" onclick="window.open('http://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(document.URL) + '&title=' +  encodeURIComponent(document.title)); return false;"><img src="<%= image_path('flat_web_icon_set/color/LinkedIn.png') %>"></a></li>
+          <li><a href="mailto:?subject=&body=:%20http%3A%2F%zendesk.cronofy.com" target="_blank" title="Email" onclick="window.open('mailto:?subject=' + encodeURIComponent(document.title) + '&body=' +  encodeURIComponent(document.URL)); return false;"><img src="<%= image_path('flat_web_icon_set/color/Email.png') %>"></a></li>
+        </ul>
+
         <p class="app-footer__about"><span class="app-footer__brand"><a href="https://www.cronofy.com/"><%= image_tag("cronofy-icon.png", class: "app-footer__logo", alt:"Cronofy") %></a> Powered by Cronofy</span> One API for all calendars.</p>
 
         <ul class="app-footer__links">
