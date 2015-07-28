@@ -276,7 +276,7 @@ class TaskSynchronizer
     unless event_deleted
       task_url = shorten_url("https://#{user.zendesk_subdomain}.zendesk.com/requests/#{task.id}")
 
-      task_summary = task.subject
+      task_summary = "##{task.id} #{task.subject}"
       task_summary += " [#{task.priority.capitalize}]" if task.priority
 
       hash[:attributes] = {
