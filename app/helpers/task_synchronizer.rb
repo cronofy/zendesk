@@ -243,7 +243,7 @@ class TaskSynchronizer
       if opts.fetch(:skip_deletes, false)
         log.info { "#update_event Skipping deletion of #{event[:event_id]}" }
       elsif !EventTracker.delete_event?(user.id, event[:event_id])
-        log.info { "#update_event already tracked deletion of #{event[:event_id]}" }
+        log.debug { "#update_event already tracked deletion of #{event[:event_id]}" }
       else
         log.info { "#update_event Deleting #{event[:event_id]}" }
         cronofy_client.delete_event(user.cronofy_calendar_id, event[:event_id])
