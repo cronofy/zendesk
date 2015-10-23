@@ -49,6 +49,14 @@ class TaskSynchronizer
 
       log.info { "Entering #sync_changed_tasks" }
 
+      calendar = calendar_info(user.cronofy_calendar_id)
+
+      if calendar.nil? || calendar.calendar_readonly
+        log.error { "Cannot sync changed tasks as calendar=#{user.cronofy_calendar_id} is readonly" }
+        log.info { "Exiting #sync_changed_tasks" }
+        return
+      end
+
       skip_deletes = user.first_zendesk_sync?
 
       sync_start = current_time
