@@ -25,6 +25,7 @@ module Zendesk
 
     if ENV["DELAYED_JOB_ENABLED"].to_i > 0
       config.active_job.queue_adapter = :delayed_job
+      Delayed::Worker.max_attempts = 10
     end
   end
 end
