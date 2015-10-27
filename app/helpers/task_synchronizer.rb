@@ -49,11 +49,8 @@ class TaskSynchronizer
 
       log.info { "Entering #sync_changed_tasks" }
 
-      calendar = calendar_info(user.cronofy_calendar_id)
-
-      if calendar.nil? || calendar.calendar_readonly
-        log.error { "Cannot sync changed tasks as calendar=#{user.cronofy_calendar_id} is readonly" }
-        log.info { "Exiting #sync_changed_tasks" }
+      if user.cronofy_calendar_id.blank?
+        log.warn { "Cannot sync changed tasks as cronofy_calendar_id is not set" }
         return
       end
 
@@ -70,17 +67,32 @@ class TaskSynchronizer
 
       log.info { "#sync_changed_tasks - tickets.count=#{tickets.count}" }
 
-      tickets.each do |ticket|
-        cronofy_request do
-          update_event(ticket, skip_deletes: skip_deletes)
+      begin
+        tickets.each do |ticket|
+          cronofy_request do
+            update_event(ticket, skip_deletes: skip_deletes)
+          end
         end
+
+        user.zendesk_last_modified = sync_start
+        user.save
+      rescue => original_error
+        begin
+          calendar = calendar_info(user.cronofy_calendar_id)
+
+          if calendar.nil? || calendar.calendar_readonly
+            log.error { "Cannot sync changed tasks as calendar=#{user.cronofy_calendar_id} is readonly - removing cronofy_calendar_id" }
+            user.cronofy_calendar_id = nil
+            user.save
+          end
+        rescue => e
+          log.error "Failed to check calendar status - #{e.message}", e
+        end
+
+        raise original_error
       end
 
-      user.zendesk_last_modified = sync_start
-      user.save
-
       log.info { "Exiting #sync_changed_tasks" }
-
     end
   end
 
