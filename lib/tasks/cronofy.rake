@@ -84,9 +84,9 @@ namespace :cronofy do
 
       log.info { "cronofy:delayed_job:check_queue jobs=#{jobs}" }
 
-      next if jobs < 500
+      next if jobs < 1_000
 
-      if jobs >= 1_000
+      if jobs >= 2_500
         color = 'danger'
       else
         color = 'warning'
