@@ -4,8 +4,6 @@ class CronofyWebhooksController < ApplicationController
   skip_before_filter :verify_authenticity_token
 
   def inbound
-    log.info { "#inbound - params=#{params.inspect}" }
-
     if params[:notification][:type] == "change"
       user = User.find_by(cronofy_id: params[:id])
 
