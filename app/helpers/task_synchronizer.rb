@@ -251,20 +251,31 @@ class TaskSynchronizer
   def update_event(task, opts = {})
     event = task_as_event(task)
 
-    if event[:event_deleted]
-      if opts.fetch(:skip_deletes, false)
-        log.info { "#update_event Skipping deletion of #{event[:event_id]}" }
-      elsif !EventTracker.delete_event?(user.id, event[:event_id])
-        log.debug { "#update_event already tracked deletion of #{event[:event_id]}" }
+    attempts = 0
+
+    begin
+      attempts += 1
+
+      if event[:event_deleted]
+        if opts.fetch(:skip_deletes, false)
+          log.info { "#update_event Skipping deletion of #{event[:event_id]}" }
+        elsif !EventTracker.delete_event?(user.id, event[:event_id])
+          log.debug { "#update_event already tracked deletion of #{event[:event_id]}" }
+        else
+          log.info { "#update_event Deleting #{event[:event_id]}" }
+          cronofy_client.delete_event(user.cronofy_calendar_id, event[:event_id])
+          EventTracker.track_delete(user.id, event[:event_id])
+        end
       else
-        log.info { "#update_event Deleting #{event[:event_id]}" }
-        cronofy_client.delete_event(user.cronofy_calendar_id, event[:event_id])
-        EventTracker.track_delete(user.id, event[:event_id])
+        log.info { "#update_event Upserting #{event[:event_id]}, #{event[:attributes]}" }
+        cronofy_client.upsert_event(user.cronofy_calendar_id, event[:attributes])
+        EventTracker.track_update(user.id, event[:event_id])
       end
-    else
-      log.info { "#update_event Upserting #{event[:event_id]}, #{event[:attributes]}" }
-      cronofy_client.upsert_event(user.cronofy_calendar_id, event[:attributes])
-      EventTracker.track_update(user.id, event[:event_id])
+    rescue Cronofy::TooManyRequestsError
+      log.warn { "Hit rate limit for user=#{user.id}, cronofy_id=#{user.cronofy_id} - attempt=#{attempts}" }
+      raise unless attempts < 10
+      sleep 15
+      retry
     end
   end
 
