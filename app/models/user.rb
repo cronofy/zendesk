@@ -66,4 +66,8 @@ class User < ActiveRecord::Base
   def cronofy_access_token_expired?(time)
     cronofy_access_token_expiration.nil? or cronofy_access_token_expiration < time
   end
+
+  def zendesk_sync_lock_set?(time)
+    zendesk_sync_lock && zendesk_sync_lock > time
+  end
 end

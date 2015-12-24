@@ -10,8 +10,13 @@ class SyncUserTasksFromZendesk < ActiveJob::Base
 
     if user
       if user.all_credentials?
-        synchronizer = TaskSynchronizer.new(user)
-        synchronizer.sync_changed_tasks
+        if user.zendesk_sync_lock_set?(Time.now)
+          retry_delay = 30.seconds
+          log.info { "Zendesk sync lock set until #{user.zendesk_sync_lock} for user_id=#{user.id} - retrying in #{retry_delay.to_i} seconds" }
+          retry_job wait: retry_delay
+        else
+          sync_changed_tasks(user)
+        end
       else
         log.warn { "Insufficient credentials to perform sync for user=#{user_id}" }
       end
@@ -31,5 +36,16 @@ class SyncUserTasksFromZendesk < ActiveJob::Base
   rescue => e
     log.error "Error within #perform(user_id=#{user_id}) - #{e.message}", e
     raise
+  end
+
+  def sync_changed_tasks(user)
+    user.zendesk_sync_lock = Time.now + 5.minutes
+    user.save
+
+    synchronizer = TaskSynchronizer.new(user)
+    synchronizer.sync_changed_tasks
+  ensure
+    user.zendesk_sync_lock = nil
+    user.save
   end
 end
