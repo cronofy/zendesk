@@ -267,7 +267,7 @@ class TaskSynchronizer
           EventTracker.track_delete(user.id, event[:event_id])
         end
       else
-        log.info { "#update_event Upserting #{event[:event_id]}, #{event[:attributes]}" }
+        log.info { "#update_event Upserting #{event[:event_id]}, #{event[:attributes][:start]}, #{event[:attributes][:tzid]}" }
         cronofy_client.upsert_event(user.cronofy_calendar_id, event[:attributes])
         EventTracker.track_update(user.id, event[:event_id])
       end
