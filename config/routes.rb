@@ -6,6 +6,9 @@ Rails.application.routes.draw do
   post 'sync', to: 'root#sync'
   post 'setup_zendesk', to: 'root#setup_zendesk'
 
+  get '/admin', to: 'admin#index'
+  get '/not_found', to: 'root#not_found'
+
   delete '/', to: 'root#destroy'
 
   post '/webhooks/cronofy/:id', to: 'cronofy_webhooks#inbound', as: 'cronofy_callback'

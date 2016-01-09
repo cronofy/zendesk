@@ -70,4 +70,8 @@ class User < ActiveRecord::Base
   def zendesk_sync_lock_set?(time)
     zendesk_sync_lock && zendesk_sync_lock > time
   end
+
+  def admin?
+    !!read_attribute(:is_admin)
+  end
 end

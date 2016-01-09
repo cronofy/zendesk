@@ -1,0 +1,24 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Email</th>
+      <th>Cronofy ID</th>
+      <th>Zendesk Subdomain</th>
+      <th>Zendesk ID</th>
+      <th>Created</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% users.each do |user| %>
+    <tr>
+      <td><%= user.id %></td>
+      <td><%= user.email %></td>
+      <td><%= user.cronofy_id %> <% if user.cronofy_credentials? %><span class="glyphicon glyphicon-ok"></span><% end %></td>
+      <td><%= user.zendesk_subdomain %></td>
+      <td><%= user.zendesk_user_id %> <% if user.zendesk_credentials? %><span class="glyphicon glyphicon-ok"></span><% end %></td>
+      <td><%= user.created_at %></td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
