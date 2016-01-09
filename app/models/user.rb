@@ -74,4 +74,5 @@ class User < ActiveRecord::Base
   def admin?
     !!read_attribute(:is_admin)
   end
+
 end

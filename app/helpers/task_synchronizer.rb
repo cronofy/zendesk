@@ -320,8 +320,8 @@ class TaskSynchronizer
         time_zone = Time.find_zone(user.zendesk_time_zone)
         reminder_time = time_zone
                           .local(task.due_at.year, task.due_at.month, task.due_at.day, REMINDER_HOUR_OF_DAY)
-                          .getutc
 
+        hash[:attributes][:tzid] = time_zone.tzinfo.identifier
         hash[:attributes][:start] = reminder_time
         hash[:attributes][:end] = reminder_time + REMINDER_DURATION_SECONDS
       end
