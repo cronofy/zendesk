@@ -10,7 +10,7 @@ class User < ActiveRecord::Base
   end
 
   def self.remove_cronofy_credentials(id)
-    log.info { "Entering .remove_cronofy_credentials(id=#{id})" }
+    log.debug { "Entering .remove_cronofy_credentials(id=#{id})" }
     user = User.find(id)
 
     user.cronofy_access_token = nil
@@ -18,19 +18,19 @@ class User < ActiveRecord::Base
     user.cronofy_access_token_expiration = nil
     user.save
 
-    log.info { "Exiting .remove_cronofy_credentials(id=#{id})" }
+    log.debug { "Exiting .remove_cronofy_credentials(id=#{id})" }
     user
   end
 
   def self.remove_zendesk_credentials(id)
-    log.info { "Entering .remove_zendesk_credentials(id=#{id})" }
+    log.debug { "Entering .remove_zendesk_credentials(id=#{id})" }
     user = User.find(id)
 
     user.zendesk_access_token = nil
     user.zendesk_subdomain = nil
     user.save
 
-    log.info { "Exiting .remove_zendesk_credentials(id=#{id})" }
+    log.debug { "Exiting .remove_zendesk_credentials(id=#{id})" }
     user
   end
 

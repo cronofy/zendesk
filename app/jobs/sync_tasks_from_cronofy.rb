@@ -4,7 +4,7 @@ class SyncTasksFromCronofy < ActiveJob::Base
   queue_as :default
 
   def perform(user_id)
-    log.info { "Entering #perform(user_id=#{user_id})" }
+    log.debug { "Entering #perform(user_id=#{user_id})" }
 
     user = User.find_by_id(user_id)
 
@@ -19,7 +19,7 @@ class SyncTasksFromCronofy < ActiveJob::Base
       log.warn { "No record found for user=#{user_id}" }
     end
 
-    log.info { "Exiting #perform(user_id=#{user_id})" }
+    log.debug { "Exiting #perform(user_id=#{user_id})" }
   rescue TaskSynchronizer::CronofyCredentialsInvalid => e
     log.warn { "#{e.class} - #{e.message}" }
     User.remove_cronofy_credentials(e.user_id)

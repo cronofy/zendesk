@@ -5,7 +5,7 @@ class UnsubscribeUserFromMailChimp < ActiveJob::Base
 
   def perform(user_email)
 
-    log.info "#perform started"
+    log.debug "#perform started"
     unless mail_chimp_api_key
       log.warn { "No mail_chimp_api_key found" }
       return

@@ -5,7 +5,7 @@ class SyncMailChimpSubscriberWithUser < ActiveJob::Base
 
   def perform(user_id)
 
-    log.info "#process started"
+    log.debug "#process started"
     unless mail_chimp_api_key
       log.warn { "No mail_chimp_api_key found" }
       return

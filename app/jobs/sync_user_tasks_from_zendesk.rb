@@ -4,7 +4,7 @@ class SyncUserTasksFromZendesk < ActiveJob::Base
   queue_as :default
 
   def perform(user_id)
-    log.info { "Entering #perform(user_id=#{user_id})" }
+    log.debug { "Entering #perform(user_id=#{user_id})" }
 
     user = User.find_by_id(user_id)
 
@@ -12,7 +12,7 @@ class SyncUserTasksFromZendesk < ActiveJob::Base
       if user.all_credentials?
         if user.zendesk_sync_lock_set?(Time.now)
           retry_delay = 30.seconds
-          log.info { "Zendesk sync lock set until #{user.zendesk_sync_lock} for user_id=#{user.id} - retrying in #{retry_delay.to_i} seconds" }
+          log.debug { "Zendesk sync lock set until #{user.zendesk_sync_lock} for user_id=#{user.id} - retrying in #{retry_delay.to_i} seconds" }
           retry_job wait: retry_delay
         else
           sync_changed_tasks(user)
@@ -24,7 +24,7 @@ class SyncUserTasksFromZendesk < ActiveJob::Base
       log.warn { "No record found for user=#{user_id}" }
     end
 
-    log.info { "Exiting #perform(user_id=#{user_id})" }
+    log.debug { "Exiting #perform(user_id=#{user_id})" }
   rescue TaskSynchronizer::CronofyCredentialsInvalid => e
     log.warn { "#{e.class} - #{e.message}" }
     User.remove_cronofy_credentials(e.user_id)

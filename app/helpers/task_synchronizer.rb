@@ -29,7 +29,7 @@ class TaskSynchronizer
     SyncUserTasksFromZendesk.perform_later(user.id)
     SyncTasksFromCronofy.perform_later(user.id)
 
-    log.info { "Exiting #setup_sync - user=#{user.id}" }
+    log.debug { "Exiting #setup_sync - user=#{user.id}" }
   end
 
   def writable_calendars
@@ -47,7 +47,7 @@ class TaskSynchronizer
   def sync_changed_tasks
     log.ndc.scope("zendesk_subdomain=#{user.zendesk_subdomain}", "user_id=#{user.id}") do
 
-      log.info { "Entering #sync_changed_tasks" }
+      log.debug { "Entering #sync_changed_tasks" }
 
       if user.cronofy_calendar_id.blank?
         log.warn { "Cannot sync changed tasks as cronofy_calendar_id is not set" }
@@ -58,7 +58,7 @@ class TaskSynchronizer
 
       sync_start = current_time
 
-      log.info { "#sync_changed_tasks - skip_deletes=#{skip_deletes}" }
+      log.debug { "#sync_changed_tasks - skip_deletes=#{skip_deletes}" }
 
       # subtract 60 secs to account for system clock differences between domains
       last_modified = user.zendesk_last_modified ? user.zendesk_last_modified - 60 : nil
@@ -92,14 +92,14 @@ class TaskSynchronizer
         raise original_error
       end
 
-      log.info { "Exiting #sync_changed_tasks" }
+      log.debug { "Exiting #sync_changed_tasks" }
     end
   end
 
   def sync_changed_events
     log.ndc.scope("zendesk_subdomain=#{user.zendesk_subdomain}", "user_id=#{user.id}") do
 
-      log.info { "Entering #sync_changed_events" }
+      log.debug { "Entering #sync_changed_events" }
 
       sync_start = current_time
 
@@ -114,7 +114,7 @@ class TaskSynchronizer
       user.cronofy_last_modified = sync_start
       user.save
 
-      log.info { "Exiting #sync_changed_events" }
+      log.debug { "Exiting #sync_changed_events" }
 
     end
   end
@@ -220,13 +220,13 @@ class TaskSynchronizer
     query = "type:ticket"
     query += " updated_at>=#{last_modified.strftime('%FT%T%:z')}" if last_modified
 
-    log.info { "#changed_tickets query=#{query}" }
+    log.debug { "#changed_tickets query=#{query}" }
 
     tickets = zendesk_client
                 .search(query: query)
                 .to_a
 
-    log.info { "#changed_tickets tickets.count=#{tickets.count}" }
+    log.debug { "#changed_tickets tickets.count=#{tickets.count}" }
     tickets
   end
 
@@ -258,7 +258,7 @@ class TaskSynchronizer
 
       if event[:event_deleted]
         if opts.fetch(:skip_deletes, false)
-          log.info { "#update_event Skipping deletion of #{event[:event_id]}" }
+          log.debug { "#update_event Skipping deletion of #{event[:event_id]}" }
         elsif !EventTracker.delete_event?(user.id, event[:event_id])
           log.debug { "#update_event already tracked deletion of #{event[:event_id]}" }
         else
@@ -333,7 +333,7 @@ class TaskSynchronizer
   # Wrapper for Cronofy API requests to handle refreshing the access token
   def cronofy_request(&block)
     if user.cronofy_access_token_expired?(current_time)
-      log.info { "#cronofy_request pre-emptively refreshing expired token" }
+      log.debug { "#cronofy_request pre-emptively refreshing expired token" }
       refresh_cronofy_access_token
     end
 
