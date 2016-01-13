@@ -98,6 +98,7 @@ class RootController < ApplicationController
     if params[:subdomain].blank?
       flash[:alert] = "We need your Zendesk subdomain"
       redirect_to :root
+      return
     end
 
     current_user.zendesk_subdomain = params[:subdomain]
