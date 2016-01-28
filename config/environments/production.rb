@@ -89,5 +89,7 @@ Rails.application.configure do
                               RbConfig::CONFIG['rubylibdir'] => '[RUBYLIBDIR]',
                               RbConfig::CONFIG['libdir']     => '[LIBDIR]',
                               RbConfig::CONFIG['sitedir']    => '[SITEDIR]'
+
+    hatchet.level :warn, 'DelayedJobLogger'
   end
 end
