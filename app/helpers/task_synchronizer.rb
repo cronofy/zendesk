@@ -317,11 +317,17 @@ class TaskSynchronizer
       }
 
       if task.due_at
-        time_zone = Time.find_zone(user.zendesk_time_zone)
-        reminder_time = time_zone
-                          .local(task.due_at.year, task.due_at.month, task.due_at.day, REMINDER_HOUR_OF_DAY)
 
-        hash[:attributes][:tzid] = time_zone.tzinfo.identifier
+        if time_zone = Time.find_zone(user.zendesk_time_zone)
+          reminder_time = time_zone
+                            .local(task.due_at.year, task.due_at.month, task.due_at.day, REMINDER_HOUR_OF_DAY)
+
+          hash[:attributes][:tzid] = time_zone.tzinfo.identifier
+        else
+          log.warn { "#task_as_event unable to load timezone for [#{user.zendesk_time_zone}"] }
+          reminder_time = Time.utc(task.due_at.year, task.due_at.month, task.due_at.day, REMINDER_HOUR_OF_DAY)
+        end
+
         hash[:attributes][:start] = reminder_time
         hash[:attributes][:end] = reminder_time + REMINDER_DURATION_SECONDS
       end
