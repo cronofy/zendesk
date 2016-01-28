@@ -324,7 +324,7 @@ class TaskSynchronizer
 
           hash[:attributes][:tzid] = time_zone.tzinfo.identifier
         else
-          log.warn { "#task_as_event unable to load timezone for [#{user.zendesk_time_zone}"] }
+          log.warn { "#task_as_event unable to load timezone for [#{user.zendesk_time_zone}]" }
           reminder_time = Time.utc(task.due_at.year, task.due_at.month, task.due_at.day, REMINDER_HOUR_OF_DAY)
         end
 
