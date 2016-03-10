@@ -7,6 +7,8 @@ Rails.application.routes.draw do
   post 'setup_zendesk', to: 'root#setup_zendesk'
 
   get '/admin', to: 'admin#index'
+  post '/admin/delete_account', to: 'admin#delete_account'
+
   get '/not_found', to: 'root#not_found'
 
   delete '/', to: 'root#destroy'
