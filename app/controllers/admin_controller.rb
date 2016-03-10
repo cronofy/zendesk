@@ -17,7 +17,6 @@ class AdminController < ApplicationController
     UnsubscribeUserFromMailChimp.perform_later(user.email)
 
     user.destroy!
-    logout
 
     flash[:info] = "Account deleted"
 
