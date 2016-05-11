@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '4.2.5'
+gem 'rails', '~> 4.2'
 gem 'pg'
 
 gem 'bootstrap-sass'
@@ -19,13 +19,14 @@ gem 'omniauth-cronofy'
 gem 'omniauth-zendesk-oauth2'
 
 gem 'hatchet'
-gem 'gibbon', '1.1.5'
+gem 'gibbon'
 
 group :development, :test do
   gem 'rspec-rails'
   gem 'spring'
-  gem 'web-console', '~> 2.0'
 end
+
+gem 'web-console', '~> 2.0', group: :development
 
 # Cronofy specific
 gem 'shortinator', git: "https://github.com/cronofy/shortinator.git"

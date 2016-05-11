@@ -1,5 +1,6 @@
 class UnsubscribeUserFromMailChimp < ActiveJob::Base
   include Hatchet
+  include MailChimpHelper
 
   @queue = :default
 
@@ -11,27 +12,18 @@ class UnsubscribeUserFromMailChimp < ActiveJob::Base
       return
     end
 
-    mail_chimp_client.lists.unsubscribe({
-      id: list_id,
-      email: { email: user_email },
-      delete_member: true,
-      send_notify: true
-    })
+    mail_chimp_client
+      .lists(mail_chimp_list_id)
+      .members(email_hash(user_email))
+      .update({
+        body: {
+          status: "unsubscribed",
+        }
+      })
 
-    log.info { "Unsubscribed #{user_email} from MailChimp list #{list_id}" }
+    log.info { "Unsubscribed #{user_email} from MailChimp list #{mail_chimp_list_id}" }
   rescue => e
     log.error "#perform error=#{e.message} for user=#{user_email}", e
   end
 
-  def list_id
-    ENV['MAILCHIMP_LIST_ID']
-  end
-
-  def mail_chimp_api_key
-    ENV['MAILCHIMP_API_KEY']
-  end
-
-  def mail_chimp_client
-    Gibbon::API.new mail_chimp_api_key
-  end
 end

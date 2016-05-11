@@ -1,5 +1,6 @@
 class SyncMailChimpSubscriberWithUser < ActiveJob::Base
   include Hatchet
+  include MailChimpHelper
 
   @queue = :default
 
@@ -16,34 +17,26 @@ class SyncMailChimpSubscriberWithUser < ActiveJob::Base
       return
     end
 
-    merge_vars = {}
-    merge_vars['FNAME'] = user.first_name if user.first_name
-    merge_vars['LNAME'] = user.last_name if user.last_name
-    merge_vars['STATUS'] = generate_status(user)
+    merge_fields = {}
+    merge_fields['FNAME'] = user.first_name if user.first_name
+    merge_fields['LNAME'] = user.last_name if user.last_name
+    merge_fields['STATUS'] = generate_status(user)
 
-    mail_chimp_client.lists.subscribe({
-      id: list_id,
-      email: { email: user.email },
-      merge_vars: merge_vars,
-      double_optin: false,
-      update_existing: true
-    })
+    mail_chimp_client
+      .lists(mail_chimp_list_id)
+      .members(email_hash(user.email))
+      .upsert({
+        body: {
+          email_address: user.email,
+          status: "subscribed",
+          merge_fields: merge_fields,
+          interests: { mail_chimp_interest_id => true },
+        },
+      })
 
-    log.info { "Synchronised #{user.email} user=#{user.id} with MailChimp list #{list_id}" }
+    log.info { "Synchronised #{user.email} user=#{user.id} with MailChimp list #{mail_chimp_list_id}" }
   rescue => e
     log.error "#perform error=#{e.message} for user=#{user.id} #{user.email}", e
-  end
-
-  def list_id
-    ENV['MAILCHIMP_LIST_ID']
-  end
-
-  def mail_chimp_api_key
-    ENV['MAILCHIMP_API_KEY']
-  end
-
-  def mail_chimp_client
-    Gibbon::API.new mail_chimp_api_key
   end
 
   def generate_status(user)
