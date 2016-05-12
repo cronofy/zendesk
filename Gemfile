@@ -16,7 +16,7 @@ gem 'cronofy'
 gem 'zendesk_api'
 
 gem 'omniauth-cronofy'
-gem 'omniauth-zendesk-oauth2'
+gem 'omniauth-zendesk-oauth2', git: "https://github.com/adambird/omniauth-zendesk-oauth2.git"
 
 gem 'hatchet'
 gem 'gibbon'

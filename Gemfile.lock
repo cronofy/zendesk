@@ -1,4 +1,12 @@
 GIT
+  remote: https://github.com/adambird/omniauth-zendesk-oauth2.git
+  revision: a74e77db5dc2c37dabc6cb34c19bfa27e2749f6a
+  specs:
+    omniauth-zendesk-oauth2 (0.1)
+      omniauth (~> 1.0)
+      omniauth-oauth2 (~> 1.1)
+
+GIT
   remote: https://github.com/cronofy/shortinator.git
   revision: 4aa6b303a78bb64bc1866d50856a4a18e4215726
   specs:
@@ -116,9 +124,6 @@ GEM
     omniauth-oauth2 (1.4.0)
       oauth2 (~> 1.0)
       omniauth (~> 1.2)
-    omniauth-zendesk-oauth2 (0.1)
-      omniauth (~> 1.0)
-      omniauth-oauth2 (~> 1.1)
     pg (0.18.4)
     postmark (1.7.1)
       json
@@ -222,7 +227,7 @@ DEPENDENCIES
   hatchet
   jquery-rails
   omniauth-cronofy
-  omniauth-zendesk-oauth2
+  omniauth-zendesk-oauth2!
   pg
   postmark-rails
   rails (~> 4.2)
