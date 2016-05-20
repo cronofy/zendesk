@@ -1,4 +1,6 @@
 class RootController < ApplicationController
+  include UsersHelper
+
   force_ssl if: :ssl_configured?
   after_action :allow_iframe
 
@@ -84,9 +86,7 @@ class RootController < ApplicationController
   end
 
   def destroy
-    UnsubscribeUserFromMailChimp.perform_later(current_user.email)
-
-    current_user.destroy!
+    delete_account(current_user)
     logout
 
     flash[:info] = "Account deleted"

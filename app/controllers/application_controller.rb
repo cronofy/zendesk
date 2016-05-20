@@ -31,4 +31,14 @@ class ApplicationController < ActionController::Base
   def ssl_configured?
     Rails.env.production?
   end
+
+  def not_found
+    log.warn { "#not_found - #{params[:requested_path] || request.fullpath}" }
+
+    respond_to do |format|
+      format.html { render template: 'root/not_found', status: 404 }
+      format.all { render nothing: true, status: 404 }
+    end
+  end
+
 end

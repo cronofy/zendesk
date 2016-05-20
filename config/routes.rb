@@ -6,9 +6,6 @@ Rails.application.routes.draw do
   post 'sync', to: 'root#sync'
   post 'setup_zendesk', to: 'root#setup_zendesk'
 
-  get '/admin', to: 'admin#index'
-  post '/admin/delete_account', to: 'admin#delete_account'
-
   get '/not_found', to: 'root#not_found'
 
   delete '/', to: 'root#destroy'
@@ -22,6 +19,10 @@ Rails.application.routes.draw do
   get '/step3.html', to: 'root#redirect'
 
   resource :session
+
+  namespace :admin do
+    resources :users, only: [:index, :destroy]
+  end
 
   match '*a', to: 'root#not_found', via: :all
   match '/',  to: 'root#not_found', via: :all
