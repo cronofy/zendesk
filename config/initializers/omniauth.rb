@@ -1,6 +1,7 @@
 Rails.application.config.middleware.use OmniAuth::Builder do
   provider :cronofy, ENV["CRONOFY_CLIENT_ID"], ENV["CRONOFY_CLIENT_SECRET"], {
-    scope: "read_account list_calendars read_events create_event delete_event"
+    scope: "read_account list_calendars read_events create_event delete_event",
+    authorize_params: { avoid_linking: 1 },
   }
 
   provider :zendesk, ENV['ZENDESK_CLIENT_ID'], ENV['ZENDESK_CLIENT_SECRET'], {
