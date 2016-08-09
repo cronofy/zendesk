@@ -20,8 +20,16 @@ class TaskSynchronizer
     @user = user
   end
 
+  def debug_log_level
+    if user && user.debug_enabled?
+      :info
+    else
+      :debug
+    end
+  end
+
   def setup_sync(callback_url)
-    log.info { "Entering #setup_sync - user=#{user.id}" }
+    log.add(debug_log_level) { "Entering #setup_sync - user=#{user.id}" }
 
     create_zendesk_notification_channel
     create_cronofy_notification_channel(callback_url)
@@ -65,7 +73,7 @@ class TaskSynchronizer
 
       tickets = changed_tickets(last_modified)
 
-      log.info { "#sync_changed_tasks - tickets.count=#{tickets.count}" }
+      log.add(debug_log_level) { "#sync_changed_tasks - tickets.count=#{tickets.count}" }
 
       begin
         tickets.each do |ticket|
@@ -105,7 +113,7 @@ class TaskSynchronizer
 
       events = changed_events
 
-      log.info { "#sync_changed_events - events.count=#{events.count}" }
+      log.add(debug_log_level) { "#sync_changed_events - events.count=#{events.count}" }
 
       events.each do |event|
         update_zendesk_task_from_event(event)
@@ -231,7 +239,7 @@ class TaskSynchronizer
   end
 
   def update_zendesk_task_from_event(event)
-    log.info { "#update_zendesk_task_from_event event_id=#{event[:event_id]}" }
+    log.add(debug_log_level) { "#update_zendesk_task_from_event event_id=#{event[:event_id]}" }
     cronofy_task = event_as_task(event)
 
     ticket = zendesk_client.tickets.find(id: cronofy_task[:id])
@@ -258,16 +266,16 @@ class TaskSynchronizer
 
       if event[:event_deleted]
         if opts.fetch(:skip_deletes, false)
-          log.debug { "#update_event Skipping deletion of #{event[:event_id]}" }
+          log.add(debug_log_level) { "#update_event Skipping deletion of #{event[:event_id]}" }
         elsif !EventTracker.delete_event?(user.id, event[:event_id])
-          log.debug { "#update_event already tracked deletion of #{event[:event_id]}" }
+          log.add(debug_log_level { "#update_event already tracked deletion of #{event[:event_id]}" }
         else
-          log.info { "#update_event Deleting #{event[:event_id]}" }
+          log.add(debug_log_level) { "#update_event Deleting #{event[:event_id]}" }
           cronofy_client.delete_event(user.cronofy_calendar_id, event[:event_id])
           EventTracker.track_delete(user.id, event[:event_id])
         end
       else
-        log.info { "#update_event Upserting #{event[:event_id]}, #{event[:attributes][:start]}, #{event[:attributes][:tzid]}" }
+        log.add(debug_log_level) { "#update_event Upserting #{event[:event_id]}, #{event[:attributes][:start]}, #{event[:attributes][:tzid]}" }
         cronofy_client.upsert_event(user.cronofy_calendar_id, event[:attributes])
         EventTracker.track_update(user.id, event[:event_id])
       end
@@ -346,7 +354,7 @@ class TaskSynchronizer
     begin
       block.call
     rescue Cronofy::AuthenticationFailureError
-      log.info { "#cronofy_request attempting to refresh token - user=#{user.id}" }
+      log.add(debug_log_level) { "#cronofy_request attempting to refresh token - user=#{user.id}" }
       refresh_cronofy_access_token
       block.call
     end

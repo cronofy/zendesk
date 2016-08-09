@@ -75,4 +75,7 @@ class User < ActiveRecord::Base
     !!read_attribute(:is_admin)
   end
 
+  def debug_enabled?
+    read_attribute(:debug_enabled)
+  end
 end
