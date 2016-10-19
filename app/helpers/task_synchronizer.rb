@@ -206,7 +206,7 @@ class TaskSynchronizer
 
   def create_cronofy_notification_channel(callback_url)
     cronofy_request do
-      cronofy_client.create_channel(callback_url)
+      cronofy_client.create_channel(callback_url, filters: { only_managed: true })
     end
   end
 
