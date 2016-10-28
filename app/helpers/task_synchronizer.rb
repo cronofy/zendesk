@@ -239,10 +239,14 @@ class TaskSynchronizer
   end
 
   def update_zendesk_task_from_event(event)
-    log.add(debug_log_level) { "#update_zendesk_task_from_event event_id=#{event[:event_id]}" }
+    log.add(debug_log_level) { "#update_zendesk_task_from_event event=#{event}" }
     cronofy_task = event_as_task(event)
 
+    log.add(debug_log_level) { "#update_zendesk_task_from_event cronofy_task=#{cronofy_task}" }
+
     ticket = zendesk_client.tickets.find(id: cronofy_task[:id])
+
+    log.add(debug_log_level) { "#update_zendesk_task_from_event ticket=#{ticket}" }
 
     if !cronofy_task[:deleted]
       ticket.type = 'task'
