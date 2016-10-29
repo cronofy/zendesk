@@ -24,6 +24,7 @@ gem 'gibbon'
 group :development, :test do
   gem 'rspec-rails'
   gem 'spring'
+  gem 'rb-readline'
 end
 
 gem 'web-console', '~> 2.0', group: :development

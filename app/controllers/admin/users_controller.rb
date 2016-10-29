@@ -2,10 +2,20 @@ module Admin
   class UsersController < BaseController
     include UsersHelper
 
-    helper_method :users
+    helper_method :user, :users
 
     def index
 
+    end
+
+    def update
+      not_found && return unless user
+
+      user.debug_enabled = params[:debug_enabled].to_i > 0
+      user.is_admin = params[:is_admin].to_i > 0
+      user.save
+
+      redirect_to admin_user_path(user.id)
     end
 
     def destroy
@@ -14,7 +24,13 @@ module Admin
     end
 
     def users
-      @users ||= User.all
+      @users ||= begin
+        if params[:q]
+          User.where("email ILIKE ?", "%#{params[:q]}%")
+        else
+          []
+        end
+      end
     end
 
     def user

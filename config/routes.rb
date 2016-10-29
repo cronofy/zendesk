@@ -21,7 +21,7 @@ Rails.application.routes.draw do
   resource :session
 
   namespace :admin do
-    resources :users, only: [:index, :destroy]
+    resources :users, only: [:index, :update, :show, :destroy]
   end
 
   match '*a', to: 'root#not_found', via: :all

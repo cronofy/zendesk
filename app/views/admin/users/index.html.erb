@@ -1,26 +1,17 @@
-<table class="table">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Email</th>
-      <th>Cronofy ID</th>
-      <th>Zendesk Subdomain</th>
-      <th>Zendesk ID</th>
-      <th>Created</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-  <% users.each do |user| %>
-    <tr>
-      <td><%= user.id %></td>
-      <td><%= user.email %></td>
-      <td><%= user.cronofy_id %> <% if user.cronofy_credentials? %><span class="glyphicon glyphicon-ok"></span><% end %></td>
-      <td><%= user.zendesk_subdomain %></td>
-      <td><%= user.zendesk_user_id %> <% if user.zendesk_credentials? %><span class="glyphicon glyphicon-ok"></span><% end %></td>
-      <td><%= user.created_at %></td>
-      <td><%= button_to "Delete", admin_user_path(user.id), method: :delete, data: { confirm: "Are you sure?" } %></td>
-    </tr>
-  <% end %>
-  </tbody>
-</table>
+<h1>Users</h1>
+
+<%= form_tag admin_users_path, method: :GET do %>
+  <%= text_field_tag :q, params[:q], autofocus: true, style: 'width: 300px', placeholder: 'Email address' %>
+  <input type="submit" value="Search" />
+<% end %>
+
+<ul>
+<% users.each do |user| %>
+  <li><%= link_to user.email, admin_user_path(user.id) %></li>
+<% end %>
+</ul>
+<% if params[:q] && users.empty? %>
+<p>
+  None found
+</p>
+<% end %>
