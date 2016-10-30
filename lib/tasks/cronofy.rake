@@ -77,6 +77,17 @@ namespace :cronofy do
     end
   end
 
+  desc "Purge records older than days specified from EventTracker"
+  task :housekeep_event_tracking, [:age_in_days] => :environment do |t, args|
+    age_in_days = (args.age_in_days || 28).to_i
+
+    log.info { "cronofy:housekeep_event_tracking started age_in_days=#{age_in_days}" }
+
+    EventTracker.where('updated_at < ?', Time.now - age_in_days.days).delete_all
+
+    log.info { "cronofy:housekeep_event_tracking completed age_in_days=#{age_in_days}" }
+  end
+
   namespace :delayed_job do
     desc "Reports to Slack if the queue is too long"
     task :check_queue => :environment do
@@ -108,4 +119,5 @@ namespace :cronofy do
       notify_slack(message)
     end
   end
+
 end
