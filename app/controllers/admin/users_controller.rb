@@ -25,7 +25,7 @@ module Admin
     end
 
     def sync_zendesk_settings
-      user.zendesk_time_zone = get_zendesk_client(current_user).current_user.time_zone
+      user.zendesk_time_zone = get_zendesk_client(user).current_user.time_zone
       user.save
 
       redirect_to admin_user_path(user.id)
