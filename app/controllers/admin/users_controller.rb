@@ -1,6 +1,7 @@
 module Admin
   class UsersController < BaseController
     include UsersHelper
+    include ZendeskApiClient
 
     helper_method :user, :users
 
@@ -21,6 +22,13 @@ module Admin
     def destroy
       delete_account(user)
       redirect_to admin_users_path
+    end
+
+    def sync_zendesk_settings
+      user.zendesk_time_zone = get_zendesk_client(current_user).current_user.time_zone
+      user.save
+
+      redirect_to admin_user_path(user.id)
     end
 
     def users

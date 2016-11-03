@@ -21,7 +21,9 @@ Rails.application.routes.draw do
   resource :session
 
   namespace :admin do
-    resources :users, only: [:index, :update, :show, :destroy]
+    resources :users, only: [:index, :update, :show, :destroy] do
+      post :sync_zendesk_settings
+    end
   end
 
   match '*a', to: 'root#not_found', via: :all

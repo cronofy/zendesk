@@ -11,6 +11,11 @@
   <dd><%= user.cronofy_id %> <% if user.cronofy_credentials? %><span class="glyphicon glyphicon-ok"></span><% end %></dd>
 </dl>
 <dl>
+  <dt>Created</dt>
+  <dd><%= user.created_at %></dd>
+</dl>
+<h4>Zendesk</h4>
+<dl>
   <dt>Zendesk ID</dt>
   <dd><%= user.zendesk_user_id %> <% if user.zendesk_credentials? %><span class="glyphicon glyphicon-ok"></span><% end %></dd>
 </dl>
@@ -19,8 +24,11 @@
   <dd><%= user.zendesk_subdomain %></dd>
 </dl>
 <dl>
-  <dt>Created</dt>
-  <dd><%= user.created_at %></dd>
+  <dt>Timezone</dt>
+  <dd><%= user.zendesk_time_zone %></dd>
+</dl>
+<dl>
+  <dd><%= button_to 'Sync Zendesk Settings', admin_user_sync_zendesk_settings_path(user.id), method: :post %></dd>
 </dl>
 <dl>
   <dd><%= button_to 'Delete', admin_user_path(user.id), method: :delete, data: { confirm: "Are you sure?" } %></dd>
