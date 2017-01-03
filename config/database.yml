@@ -18,3 +18,5 @@ test:
 
 production:
   <<: *default
+  url: <%= ENV['POSTGRES_URL'] %>
+  pool: 10
