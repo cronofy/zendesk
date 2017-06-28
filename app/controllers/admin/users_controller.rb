@@ -42,7 +42,7 @@ module Admin
     end
 
     def user
-      @user ||= User.find(params[:id].to_i)
+      @user ||= User.find((params[:id] || params[:user_id]).to_i)
     rescue ActiveRecord::RecordNotFound
       nil
     end
