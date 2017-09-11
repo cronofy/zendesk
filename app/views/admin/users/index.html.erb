@@ -1,7 +1,8 @@
 <h1>Users</h1>
 
 <%= form_tag admin_users_path, method: :GET do %>
-  <%= text_field_tag :q, params[:q], autofocus: true, style: 'width: 300px', placeholder: 'Email address' %>
+  <%= text_field_tag :email, params[:email], autofocus: true, style: 'width: 300px', placeholder: 'Email address' %>
+  <%= text_field_tag :zendesk_subdomain, params[:zendesk_subdomain], autofocus: true, style: 'width: 300px', placeholder: 'Zendesk Subdomain' %>
   <input type="submit" value="Search" />
 <% end %>
 
@@ -10,7 +11,7 @@
   <li><%= link_to user.email, admin_user_path(user.id) %></li>
 <% end %>
 </ul>
-<% if params[:q] && users.empty? %>
+<% if (params[:email] || params[:zendesk_subdomain]) && users.empty? %>
 <p>
   None found
 </p>
