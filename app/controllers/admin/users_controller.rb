@@ -33,8 +33,10 @@ module Admin
 
     def users
       @users ||= begin
-        if params[:q]
-          User.where("email ILIKE ?", "%#{params[:q]}%")
+        if !params[:email].blank?
+          User.where("email ILIKE ?", "%#{params[:email]}%")
+        elsif !params[:zendesk_subdomain].blank?
+          User.where("zendesk_subdomain ILIKE ?", "%#{params[:zendesk_subdomain]}%")
         else
           []
         end
