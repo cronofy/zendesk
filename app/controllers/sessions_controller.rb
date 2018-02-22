@@ -18,6 +18,10 @@ class SessionsController < ApplicationController
       flash[:error] = "Unrecognised provider login"
     end
     redirect_to :root
+  rescue ZendeskApiClient::ZendeskAdminRequiredError => e
+    flash[:alert] = "It looks like you're the first person from your Zendesk subdomain to sign up. Please can you ask an admin to perform the initial authorisation. This ensures all of the connections with Zendesk are properly in place."
+    log.error "#create failed for user=#{current_user} with #{e.class} #{e.message}", e
+    redirect_to :root
   end
 
   def failure

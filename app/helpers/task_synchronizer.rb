@@ -140,23 +140,24 @@ class TaskSynchronizer
     target_id = nil
 
     zendesk_client.targets.all do |target|
-      target_id = target.id if target.target_url == target_url
+      return target.id if target.target_url == target_url
     end
 
-    unless target_id
-      target = zendesk_client.targets.create(
-        type: "url_target",
-        title: "Calendar Connector Target",
-        target_url: target_url,
-        attribute: "message",
-        method: "post"
-      )
+    target = zendesk_client.targets.create(
+      type: "url_target",
+      title: "Calendar Connector Target",
+      target_url: target_url,
+      attribute: "message",
+      method: "post"
+    )
 
-      log.debug { "#upsert_zendesk_target target=#{target.inspect}" }
-      target_id = target.id
+    log.debug { "#upsert_zendesk_target target=#{target.inspect}" }
+
+    unless target
+      raise ZendeskApiClient::ZendeskAdminRequiredError.new(user.id, user.zendesk_subdomain, "create_target")
     end
 
-    target_id
+    target.id
   end
 
   def upsert_zendesk_trigger(target_id)
@@ -199,6 +200,10 @@ class TaskSynchronizer
       }
 
       active_trigger = zendesk_client.triggers.create(trigger_attributes)
+    end
+
+    unless target
+      raise ZendeskApiClient::ZendeskAdminRequiredError.new(user.id, user.zendesk_subdomain, "create_trigger")
     end
 
     active_trigger
