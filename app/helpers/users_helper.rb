@@ -10,9 +10,9 @@ module UsersHelper
 
     user.destroy!
 
-    log.info { "#delete_account for user_id=#{current_user.id} completed" }
+    log.info { "#delete_account for user_id=#{user.id} completed" }
   rescue => e
-    log.error "#delete_account failed for user_id=#{user.id} with #{e.message}", e
+    log.error "#delete_account failed for user_id=#{user.id} - #{e.class} - #{e.message}", e
     raise
   end
 
