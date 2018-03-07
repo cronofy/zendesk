@@ -58,7 +58,7 @@ class TaskSynchronizer
       log.debug { "Entering #sync_changed_tasks" }
 
       if user.cronofy_calendar_id.blank?
-        log.warn { "Cannot sync changed tasks as cronofy_calendar_id is not set" }
+        log.info { "Not syncing changed tasks as cronofy_calendar_id is not set" }
         return
       end
 
