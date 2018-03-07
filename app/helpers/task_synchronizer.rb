@@ -202,7 +202,7 @@ class TaskSynchronizer
       active_trigger = zendesk_client.triggers.create(trigger_attributes)
     end
 
-    unless target
+    unless active_trigger
       raise ZendeskApiClient::ZendeskAdminRequiredError.new(user.id, user.zendesk_subdomain, "create_trigger")
     end
 
