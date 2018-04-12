@@ -30,7 +30,7 @@ module Admin
         user.save
       else
         flash[:danger] = "Failed to get zendesk user for user_id=#{user.id}"
-        log.warning "#sync_zendesk_settings failed for user_id=#{user.id}"
+        log.warn "#sync_zendesk_settings failed for user_id=#{user.id}"
       end
 
       redirect_to admin_user_path(user.id)
