@@ -18,7 +18,7 @@ class SyncUserTasksFromZendesk < ActiveJob::Base
           sync_changed_tasks(user)
         end
       else
-        log.warn { "Insufficient credentials to perform sync for user=#{user_id}" }
+        log.debug { "Insufficient credentials to perform sync for user=#{user_id}" }
       end
     else
       log.warn { "No record found for user=#{user_id}" }

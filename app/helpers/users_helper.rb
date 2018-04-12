@@ -4,9 +4,10 @@ module UsersHelper
 
     UnsubscribeUserFromMailChimp.perform_later(user.email)
 
-    cronofy = cronofy_client(user)
-
-    cronofy.revoke_authorization
+    if user.cronofy_credentials?
+      cronofy = cronofy_client(user)
+      cronofy.revoke_authorization
+    end
 
     user.destroy!
 
