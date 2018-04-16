@@ -8,12 +8,12 @@ GIT
 
 GIT
   remote: https://github.com/cronofy/shortinator.git
-  revision: 4aa6b303a78bb64bc1866d50856a4a18e4215726
+  revision: d35d6c0be525f1cb8451d5a1f5412f0d8c2db4a4
   specs:
     shortinator (0.1.0)
       base62 (= 1.0.0)
-      bson (~> 1.8)
-      mongo (~> 1.8)
+      bson (~> 4.0)
+      mongo (~> 2.0)
 
 GEM
   remote: https://rubygems.org/
@@ -62,9 +62,10 @@ GEM
     bootstrap-sass (3.3.7)
       autoprefixer-rails (>= 5.2.1)
       sass (>= 3.3.4)
-    bson (1.12.5)
+    bson (4.3.0)
     builder (3.2.2)
     concurrent-ruby (1.0.2)
+    crass (1.0.4)
     cronofy (0.12.0)
       hashie (>= 2.1, < 4)
       oauth2 (~> 1.0)
@@ -96,7 +97,8 @@ GEM
     json (1.8.6)
     jwt (1.5.6)
     kgio (2.10.0)
-    loofah (2.0.3)
+    loofah (2.2.2)
+      crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     mail (2.6.4)
       mime-types (>= 1.16, < 4)
@@ -105,8 +107,8 @@ GEM
     mime-types-data (3.2016.0521)
     mini_portile2 (2.3.0)
     minitest (5.11.3)
-    mongo (1.12.5)
-      bson (= 1.12.5)
+    mongo (2.5.1)
+      bson (>= 4.3.0, < 5.0.0)
     multi_json (1.12.1)
     multi_xml (0.5.5)
     multipart-post (2.0.0)
