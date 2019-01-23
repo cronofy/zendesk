@@ -270,7 +270,7 @@ class TaskSynchronizer
       hash[:attributes] = {
         event_id: task.id,
         summary: task_summary,
-        description: "#{task_url}\n\n#{task.description}",
+        description: "#{task_url}\n\n#{task.description[0, 2000]}",
       }
 
       if task.due_at
