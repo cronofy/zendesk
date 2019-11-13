@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'rails', '~> 4.2'
-gem 'pg'
+gem 'pg', '~> 0.21'
 
 gem 'bootstrap-sass'
 gem 'jquery-rails'
@@ -20,6 +20,7 @@ gem 'omniauth-zendesk-oauth2', git: "https://github.com/adambird/omniauth-zendes
 
 gem 'hatchet'
 gem 'gibbon'
+gem 'mailerlite'
 
 group :development, :test do
   gem 'rspec-rails'
