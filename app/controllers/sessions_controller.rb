@@ -60,7 +60,7 @@ class SessionsController < ApplicationController
 
     login(user)
     setup_sync(user)
-    SyncMailChimpSubscriberWithUser.perform_later(user.id)
+    SyncMailerliteSubscriberWithUser.perform_later(user.id)
   end
 
   def process_zendesk_login(auth_hash)
@@ -71,7 +71,7 @@ class SessionsController < ApplicationController
     current_user.save
 
     setup_sync(current_user)
-    SyncMailChimpSubscriberWithUser.perform_later(current_user.id)
+    SyncMailerliteSubscriberWithUser.perform_later(current_user.id)
   end
 
   def setup_sync(user)

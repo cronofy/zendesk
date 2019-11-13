@@ -2,7 +2,7 @@ module UsersHelper
 
   def delete_account(user)
 
-    UnsubscribeUserFromMailChimp.perform_later(user.email)
+    UnsubscribeUserFromMailerlite.perform_later(user.email)
 
     if user.cronofy_credentials?
       cronofy = cronofy_client(user)

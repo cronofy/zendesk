@@ -20,6 +20,7 @@ gem 'omniauth-zendesk-oauth2', git: "https://github.com/adambird/omniauth-zendes
 
 gem 'hatchet'
 gem 'gibbon'
+gem 'mailerlite'
 
 group :development, :test do
   gem 'rspec-rails'

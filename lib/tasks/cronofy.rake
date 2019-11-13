@@ -71,9 +71,9 @@ namespace :cronofy do
     end
   end
 
-  task :sync_mail_chimp => :environment do
+  task :sync_mailerlite => :environment do
     User.all.each do |user|
-      SyncMailChimpSubscriberWithUser.perform_later(user.id)
+      SyncMailerliteSubscriberWithUser.perform_later(user.id)
     end
   end
 
