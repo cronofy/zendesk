@@ -6,6 +6,7 @@ gem 'pg', '~> 0.21'
 gem 'bootstrap-sass'
 gem 'jquery-rails'
 gem 'sass-rails', '~> 5.0'
+gem 'sass', '3.4.22' # 3.4.23 introduced dependency on Sass log_level methods
 gem 'uglifier', '>= 1.3.0'
 
 gem 'delayed_job_active_record'
