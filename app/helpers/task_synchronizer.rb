@@ -288,6 +288,8 @@ class TaskSynchronizer
         cronofy_client.upsert_event(user.cronofy_calendar_id, event[:attributes])
         EventTracker.track_update(user.id, event[:event_id])
       end
+    rescue Cronofy::InvalidRequestError
+      log.warn { "Invalid request for user=#{user.id}, cronofy_id=#{user.cronofy_id} - assume due date out of bounds so ignoring" }
     rescue Cronofy::TooManyRequestsError
       log.warn { "Hit rate limit for user=#{user.id}, cronofy_id=#{user.cronofy_id} - attempt=#{attempts}" }
       raise unless attempts < 10
@@ -334,7 +336,6 @@ class TaskSynchronizer
       }
 
       if task.due_at
-
         if time_zone = Time.find_zone(user.zendesk_time_zone)
           reminder_time = time_zone
                             .local(task.due_at.year, task.due_at.month, task.due_at.day, REMINDER_HOUR_OF_DAY)
