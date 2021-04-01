@@ -3,6 +3,8 @@ source 'https://rubygems.org'
 gem 'rails', '~> 4.2'
 gem 'pg', '~> 0.21'
 
+gem 'nokogiri', '~> 1.10.0'
+
 gem 'bootstrap-sass'
 gem 'jquery-rails'
 gem 'sass-rails', '~> 5.0'
