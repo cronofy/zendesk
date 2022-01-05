@@ -54,7 +54,6 @@ class RootController < ApplicationController
       flash[:info] = "Calendar ID set"
 
       setup_sync
-      SyncMailerliteSubscriberWithUser.perform_later(current_user.id)
     else
       flash[:alert] = "Must be connected to your calendar account before we do that"
     end
