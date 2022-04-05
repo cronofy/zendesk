@@ -26,22 +26,25 @@ class SyncUserTasksFromZendesk < ActiveJob::Base
 
     log.debug { "Exiting #perform(user_id=#{user_id})" }
   rescue TaskSynchronizer::CronofyCredentialsInvalid => e
-    log.warn { "#{e.class} - #{e.message}" }
+    log.warn { "user_id=#{user_id} - #{e.class} - #{e.message}" }
     User.remove_cronofy_credentials(e.user_id)
     RelinkMailer.relink_cronofy(e.user_id).deliver_later
   rescue ZendeskApiClient::ZendeskCredentialsInvalid => e
-    log.warn { "#{e.class} - #{e.message}" }
+    log.warn { "user_id=#{user_id} - #{e.class} - #{e.message}" }
     User.remove_zendesk_credentials(e.user_id)
     RelinkMailer.relink_zendesk(e.user_id).deliver_later
-  rescue => e
+  rescue JSON::ParserError => e
     if e.message.include?('"error"=>"invalid_token"')
-      log.warn { "#{e.class} - #{e.message}" }
-      User.remove_zendesk_credentials(e.user_id)
-      RelinkMailer.relink_zendesk(e.user_id).deliver_later
+      log.warn { "user_id=#{user_id} - #{e.class} - #{e.message}" }
+      User.remove_zendesk_credentials(user_id)
+      RelinkMailer.relink_zendesk(user_id).deliver_later
     else
       log.error "Error within #perform(user_id=#{user_id}) - #{e.class} - #{e.message}", e
       raise
     end
+  rescue => e
+    log.error "Error within #perform(user_id=#{user_id}) - #{e.class} - #{e.message}", e
+    raise
   end
 
   def sync_changed_tasks(user)
