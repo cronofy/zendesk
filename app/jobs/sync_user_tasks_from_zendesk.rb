@@ -34,8 +34,14 @@ class SyncUserTasksFromZendesk < ActiveJob::Base
     User.remove_zendesk_credentials(e.user_id)
     RelinkMailer.relink_zendesk(e.user_id).deliver_later
   rescue => e
-    log.error "Error within #perform(user_id=#{user_id}) - #{e.message}", e
-    raise
+    if e.message.include?('"error"=>"invalid_token"')
+      log.warn { "#{e.class} - #{e.message}" }
+      User.remove_zendesk_credentials(e.user_id)
+      RelinkMailer.relink_zendesk(e.user_id).deliver_later
+    else
+      log.error "Error within #perform(user_id=#{user_id}) - #{e.class} - #{e.message}", e
+      raise
+    end
   end
 
   def sync_changed_tasks(user)
