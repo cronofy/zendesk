@@ -99,7 +99,7 @@ GEM
     json (2.5.1)
     jwt (2.2.1)
     kgio (2.11.2)
-    loofah (2.9.1)
+    loofah (2.19.1)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     mail (2.7.1)
